@@ -21,12 +21,12 @@ Just kidding! Let's have fun, learn a lot, and be proud of our work. FULL POWER!
 
 ## **Team Roles**
 
-|    |Project Manager|Requirement Analyst|System Architect|Programmer|Tester|Liaison|
+|    |Project Manager|Requirement Analyst|System Architect|Developer|Tester|Liaison|
 |---|---|---|---|---|---|---|
-|Gonçalo Carneiro (Goncas)| ✔️| | | | | |
-|Luís Veiga| | | | ✔️| | |
-|Jorge Pontes| | | | ✔️| | |
-|Bai Yihang (Higgs)| | | | | | |
-|Pedro Santos| | | | | | |
-|Mariana Dias| | | | | | ✔️|
+|Gonçalo Carneiro (Goncas)| ✔️| | | ✔️| ✔️| |
+|Luís Veiga| | | | ✔️| ✔️| |
+|Jorge Pontes| | | | ✔️| ✔️| |
+|Bai Yihang (Higgs)| | ✔️| | | ✔️| |
+|Pedro Santos| | ✔️| ✔️| | | |
+|Mariana Dias| | | ✔️| | | ✔️|
 
