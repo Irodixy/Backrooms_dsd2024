@@ -13,7 +13,7 @@ Our group is responsible for the development of Backend and Database.
 
 [Bai Yihang (Higgs)]():
 
-**['Pedro'](../Docs/PedroSantosCV.pdf)**
+**['Pedro'](Docs/PedroSantosCV.pdf)**
 
 [Mariana Dias]():
 
