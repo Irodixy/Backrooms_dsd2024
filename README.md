@@ -1,5 +1,6 @@
 # 🖥 Backrooms DSD2024 🇨🇳🤝🇵🇹
 Hi there, welcome to the new and (totally) not improved BACKROOMS, where all of us come to get lost and lose touch with reality.
+Our group is responsible for the development of Backend and Database.
 
 ## 👥️ **Team Members**
 
