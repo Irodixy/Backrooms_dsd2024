@@ -5,17 +5,18 @@ Our group is responsible for the development of Backend and Database.
 
 ## 👥️ **Team Members**
 
-[Gonçalo Carneiro (Goncas)](https://github.com/Irodixy):
 
-[Luís Veiga](https://github.com/LuisVeiga11):
+**[Gonçalo Carneiro (Goncas)]()**
 
-[Jorge Pontes](https://github.com/JorgeMFPontes):
+**[Luís Veiga]()**
 
-[Bai Yihang (Higgs)]():
+**[Jorge Pontes]()**
 
-**['Pedro'](Docs/PedroSantosCV.pdf)**
+**[Bai Yihang (Higgs)](Docs/Higgs.pdf)**
 
-[Mariana Dias]():
+**[Pedro Santos](Docs/PedroSantosCV.pdf)**
+
+**[Mariana Dias](Docs/MarianaDiasCV.pdf)**
 
 ## **Team Roles**
 
