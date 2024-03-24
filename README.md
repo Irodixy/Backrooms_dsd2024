@@ -6,7 +6,7 @@ Our group is responsible for the development of Backend and Database.
 ## 👥️ **Team Members**
 
 
-**[Gonçalo Carneiro (Goncas)](Docs/Goncas.pdf): Team Leader**
+**[Gonçalo Carneiro (Goncas):](Docs/Goncas.pdf) Team Leader**
 
 **[Luís Veiga]()**
 
