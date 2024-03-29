@@ -33,7 +33,7 @@ Our group is responsible for the development of Backend and Database.
 03/05/2024 : Team Building ☑ <br>
 03/08/2024 : Role Selection ☑ <br>
 03/11/2024 : **[Requirements Analysis](Project/RequirementsAnalysis.pdf)** ☑  <br>
-03/20/2024 : System Design <br>
+03/20/2024 : **[System Design](Project/SystemDesign)** ☑  <br>
 04/13/2024 : Implementation with Unit Testing <br>
 04/20/2024 : Deployment with Integration Testing<br>
 05/04/2024 : Requirement Analysis for Iteration 2<br>
