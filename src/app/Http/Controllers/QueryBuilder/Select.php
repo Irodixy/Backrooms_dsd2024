@@ -138,6 +138,16 @@ class ControllerQuerySelect extends Controller
 												[????????????????]);
 			break;
 			
+			//Interface 26 web::Analytics ==> database::Analytics
+			//ADMIN SEES SELECT RATINGS TO REFLECT
+			case 26:
+				$this->_dbSelect = DB::select('SELECT comments, rating
+												FROM feedback, 
+												WHERE rating >= 3
+												AND u.username = ?
+												AND o',
+			break;
+			
 			case 28:
 				$this->_dbSelect = DB::select('SELECT u.username, s.name, i.name, f.comment, f.rating, f.date
 												FROM feedback f

@@ -9,11 +9,11 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     /**
-     * Show a list of all of the application's users.
+     * Show a list of all of the application's users!
      */
     public function index(): View
     {
-        $users = DB::select('select * from users');
+        $users = DB::select('select * from users where id=6');
 		dd($users);
         return view('/showRead', ['users' => $users]);
     }
