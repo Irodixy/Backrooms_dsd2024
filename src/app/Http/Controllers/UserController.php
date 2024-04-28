@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index(): View
     {
         $users = DB::select('select * from users where id=6');
-		dd($users);
+		print_r($users);
         return view('/showRead', ['users' => $users]);
     }
 }

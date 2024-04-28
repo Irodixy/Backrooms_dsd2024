@@ -9,7 +9,7 @@ class ControllerQueryUpdate extends Controller
 	private $_dbUpdate
 	private $_dbSelect
 	
-	public QueryUpdate($ID, $array)
+	public function QueryUpdate($ID, $array)
 	{
 		switch($ID)
 		{

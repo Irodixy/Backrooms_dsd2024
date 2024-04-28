@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class ControllerQueryDelete extends Controller
 {
-	public QueryDelete($ID, $array)
+	public function QueryDelete($ID, $array)
 	{
 		switch($ID)
 		{

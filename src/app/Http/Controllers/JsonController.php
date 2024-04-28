@@ -9,14 +9,17 @@ class JsonController extends Controller
 {
     public function transformJsonToString($file)
     {
-        // Path to the JSON file
+        /*// Path to the JSON file
         $jsonFilePath = storage_path($file);
 
         // Read the content of the JSON file
         $jsonContent = File::get($jsonFilePath);
 
         // Decode the JSON content into an array
-        $jsonData = json_decode($jsonContent, true);
+        $jsonData = json_decode($jsonContent, true);*/
+		
+		// Decode the JSON content into an array
+        $jsonData = json_decode($file, true);
 
         // Initialize an empty array to store string representations
         $stringData = [];

@@ -4,15 +4,52 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
-class ControllerQueryInsert extends Controller
+class InsertController extends Controller
 {
-	public QueryInsert($ID, $array) {
+	private $_dbInsert;
+	private $_newArray;
+	
+	public function QueryInsert($ID, $array) 
+	{
+		$SuccessToken = "";
 		switch($ID)
 		{
 			//Interface 4 frontend::HuntedStore ==> database::HuntedStore
 			case 4:
+			$save = [];
+			
 				//do a try (still not done)
-				DB::insert('insert into huntedStore (IDUser, IDStore) values(?, ?)', [$array["IDUser"], $array["IDStore"]]);
+				$temporary = DB::select('SELECT ID AS userId
+									FROM users 
+									WHERE username = ?', 
+									[$array["CurrentUser"]]);
+				
+				foreach($temporary as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						$save[$key] = $x;
+					}
+				}
+				print_r($save);
+				//print_r($saves);
+				
+				$this->_dbInsert = DB::insert('INSERT into huntedstore (IDUser, IDStore) values(?, ?)', 
+												[$save["userId"], $array["HuntedStoreIdList"]]);
+				if($this->_dbInsert == 1)
+				{
+					$SuccessToken = true;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
+				else
+				{
+					$SuccessToken = false;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
+				//print_r($this->_dbInsert);
 			break;
 			//Interface 8 frontend::Feedback2Store ==> database::Feedback2Store
 			case 8:
@@ -96,27 +133,7 @@ class ControllerQueryInsert extends Controller
 
 			break;
 		}
+		return $newArray = $this->_newArray;//array("oi" => "oi");
 	}
 }
 ?>
-
-INSERT into users
-(username, password, email)
-VALUES ("Owner Matias", "kidjkifsjfsf", "matias23@gmail.com");
-
-INSERT into owner
-(IDUser)
-VALUE ((SELECT ID FROM users WHERE username = "Owner Matias" AND password = "kidjkifsjfsf"));
-
-INSERT into store
-(IDOwner, name, type, description)
-VALUES ((SELECT ID
-		FROM users
-		WHERE username = "Owner Matias"
-		AND password = "kidjkifsjfsf"), "Comi Bem", "marisqueira", "Coma o melhor camarão da sua vida");
-        
-INSERT into location 
-(IDStore, latitude, longitude, country, state, city, street, number, floor, zipcode) 
-VALUES ((SELECT ID
-		FROM store
-		WHERE name = "Comi Bem"),41.2910451618087, -7.753595445490844, "Portugal","" , "Vila Real", "Rua Mioleira", 2, "5º", "4560-555");
