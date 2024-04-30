@@ -32,8 +32,6 @@ class InsertController extends Controller
 						$save[$key] = $x;
 					}
 				}
-				print_r($save);
-				//print_r($saves);
 				
 				$this->_dbInsert = DB::insert('INSERT into huntedstore (IDUser, IDStore) values(?, ?)', 
 												[$save["userId"], $array["HuntedStoreIdList"]]);
@@ -49,7 +47,6 @@ class InsertController extends Controller
 					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
 										"SuccessToken" => $SuccessToken);
 				}
-				//print_r($this->_dbInsert);
 			break;
 			//Interface 8 frontend::Feedback2Store ==> database::Feedback2Store
 			case 8:

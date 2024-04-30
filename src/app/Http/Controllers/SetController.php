@@ -19,11 +19,11 @@ class SetController extends Controller
 
 		// Decode the JSON content into an array
 		$jsonArray = json_decode(file_get_contents($request->file('fileToUpload')->path()), true);
-
+		print_r($jsonArray);
 		// Depending on the InterfaceId, a different query is waiting
         $pickInterface = new IdentifyInterface();
 		$flag = $pickInterface->InterfaceID($jsonArray["InterfaceId"], $jsonArray);
-		print_r($flag);
+		//print_r($flag);
 		//echo $jsonArray["InterfaceId"];
 		//print_r($jsonArray);
 		

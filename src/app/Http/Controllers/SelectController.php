@@ -13,7 +13,7 @@ class SelectController extends Controller
 	public function QuerySelect($ID, $array)
 	{
 		$MatchToken = "";
-		$temporary;
+		$temporary = [];
 		switch($ID)
 		{
 			//Interface 1 frontend::Login ==> database::Login
@@ -90,7 +90,7 @@ class SelectController extends Controller
 							}
 							else
 							{
-								$location = array("ERROR, location not found");
+								$location = "ERROR, location not found";
 							}
 
 							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
@@ -133,94 +133,6 @@ class SelectController extends Controller
 				
 				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
 											"StoreList" => $StoreList);
-				
-				/*$temporary = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-										"StoreList" => array("storeId" => $x["storeId"], "storeName" => $x["storeName"], 
-																"location" => array(), items => array($temporary[$i]), "StoreDescription" => $x["StoreDescription"]));		
-				foreach($this->_dbSelect as $Obj)
-				{
-					foreach($Obj as $key => $x)
-					{
-						if($key === "storeId")
-						{
-							$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-												FROM store s, location l
-												WHERE s.ID = l.IDStore
-												AND s.ID = ?', 
-												[$x]);
-						}
-						
-					}
-					
-					$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-												FROM store s, location l
-												WHERE s.ID = l.IDStore
-												AND s.ID = ?', 
-												[$Obj["storeId"]]);
-												
-					$location = [];
-					if(count($temporary) > 0)
-					{						
-						foreach($temporary as $x)
-						{
-							array_push($location, $x)
-						}
-					}
-					else
-					{
-						$location = array("ERROR, location not found");
-					}
-						
-					
-					$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, 
-											i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
-																FROM item i, store s
-																WHERE IDStore = ?
-																AND i.IDStore = s.ID', 
-																[Obj["storeId"]]);
-					$item = [];
-					if(count($temporary) > 0)
-					{
-						foreach($temporary as $x)
-						{
-							array_push($item, $x)
-						}
-					}
-					else
-					{
-						$item = array("ERROR, item not found");
-					}						
-					
-															
-					if(count($temporary) <= 0)
-					{
-						$temporary = array("Error getting Item");
-					}
-
-					$temporary = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-										"StoreList" => array("storeId" => $x["storeId"], "storeName" => $x["storeName"], 
-																"location" => array(), items => array($temporary[$i]), "StoreDescription" => $x["StoreDescription"]));
-
-					array_push($this->_newArray, $temporary)
-				}
-				
-												
-				if(count($this->_dbSelect) > 0)
-				{
-					foreach($this->_dbSelect as $x)
-					{
-						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-										"StoreList" => array("storeId" => $x["storeId"], "storeName" => $x["storeName"], 
-																"location" => array(), items => array($temporary[$i]), "StoreDescription" => $x["StoreDescription"]));
-						$i++;
-					}
-					
-				}
-				else
-				{
-					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-										"ErroMsg" => "Error, no stores available for that search");
-				}*/
 			break;
 			
 			//Interface 23 web::Management ==> database::Administrator
@@ -233,39 +145,249 @@ class SelectController extends Controller
 			break;
 			
 			//Interface 5 database::HuntedStore ==> frontend::HuntedStore
+			//DISPLAY SEARCH STORE HISTORY TO CUSTOMER
 			case 5:
-				$this->_dbSelect = DB::select('select s.name, h.date_time 
-												from store s, huntedstore h, users u 
-												where u.username=? and u.ID = h.IDUser and h.IDStore = s.ID', 
-												[$array["username"]]);
+				$this->_dbSelect = DB::select('SELECT s.ID, s.name, h.date_time 
+												FROM store s, huntedstore h, users u 
+												WHERE u.username = ? 
+												AND u.ID = h.IDUser 
+												AND h.IDStore = s.ID', 
+												[$array["CurrentUser"]]);
+												
+				if(count($this->_dbSelect) > 0)
+				{						
+					foreach($this->_dbSelect as $Obj)
+					{
+						$oneItem = [];
+						foreach($Obj as $key => $x)
+						{
+							$oneItem[$key] = $x;
+						}
+						array_push($temporary, $oneItem);
+					}
+				}
+				else
+				{
+					$temporary = array("ERROR, no History to show");
+				}
+							
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+											"HuntedStoreIdList" => $temporary);
 			break;
 			
 			//Interface 6 frontend::Item ==> database:Item
+			//DISPLAY TO CUSTOMER ITEMS THAT HE/SHE SEARCH
 			case 6:
-				$this->_dbSelect = DB::table('item')->where('name', '%$array["ItemName"]%')->get();
+				$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, 
+												i.imgName AS ItemImage, i.IDStore AS ItemStoreId
+												FROM item i
+												WHERE i.name LIKE ?', 
+												['%' . $array["ItemName"] . '%']);
+												
+				if(count($this->_dbSelect) > 0)
+				{						
+					foreach($this->_dbSelect as $Obj)
+					{
+						$oneItem = [];
+						foreach($Obj as $key => $x)
+						{
+							$oneItem[$key] = $x;
+						}
+						array_push($temporary, $oneItem);
+					}
+				}
+				else
+				{
+					$temporary = array("ERROR, no item found");
+				}
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+											"ItemList" => $temporary);
 			break;
 			
 			//Interface 13 database::Store ==> algorithm::Store
 			case 13:
 			//Interface 7 frontend::Map ==> database::Map
 			case 7:
-			//SHOW STORES AROUND X FROM USER
-				/*
-				$this->_dbSelect = store::select('id', 'name', 'latitude', 'longitude')
-									->selectRaw(
-										'( 6371 * acos( cos( radians(?) ) *
-										cos( radians( latitude ) ) *
-										cos( radians( longitude ) - radians(?) ) +
-										sin( radians(?) ) *
-										sin( radians( latitude ) ) ) ) AS distance',
-										[$userLat, $userLng, $userLat]
-									)
-									->having('distance', '<=', $maxDistance)
-									->orderBy('distance', 'asc')
-									->get();
-									$array["UserLatitude"]
-									*/
+			//SHOW STORES AROUND X DISTANCE FROM USER
+				$this->_dbSelect = DB::select(
+						'SELECT s.ID AS storeId, s.name AS storeName, s.type, s.description AS StoreDescription 
+						FROM store s, location l  
+						WHERE ( 6371 * acos( cos( radians(?) ) *
+								cos( radians( l.latitude ) ) *
+								cos( radians( l.longitude ) - radians(?) ) +
+								sin( radians(?) ) *
+								sin( radians( l.latitude ) ) ) ) <= ? 
+								AND s.ID = l.IDStore 
+						ORDER BY name ASC', 
+						[$array["MyLocation"]["latitude"], $array["MyLocation"]["longitude"], 
+						$array["MyLocation"]["latitude"], $array["maxDistance"]]);
+				
+				//Variables to save data and help reorganize the future JSON file			
+				$StoreList = [];
+				$location = [];
+					$items = [];
+					$save = [];
+				
 				switch($array["RequestType"])
+				{
+					//CUSTOMER SEES STORES WITHIN X DISTANCE
+					case 1:
+					//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+					foreach($this->_dbSelect as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							//store Id is necessary to get more necessary data from DB, so we use an "if"
+							//to use this key value in all other select querys
+							if($key === "storeId")
+							{
+								$save[$key] = $x;
+								
+								$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+													FROM store s, location l
+													WHERE s.ID = l.IDStore
+													AND s.ID = ?', 
+													[$x]);
+													
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										foreach($Obj as $key => $y)
+										{
+											$location[$key] = $y;
+										}
+									}
+								}
+								else
+								{
+									$location = "ERROR, location not found";
+								}
+
+								$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+													FROM item i, store s
+													WHERE s.ID = ?
+													AND i.IDStore = s.ID', 
+													[$x]);
+
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										$oneItem = [];
+										foreach($Obj as $key => $y)
+										{
+											$oneItem[$key] = $y;
+										}
+										array_push($items, $oneItem);
+									}
+								}
+								else
+								{
+									$items = array("ERROR, item not found");
+								}
+							}
+							else if($key === "storeName")
+							{
+								$save[$key] = $x;
+							}
+							else if($key === "StoreDescription")
+							{
+								$save['location'] = $location;
+								$save['items'] = $items;
+								$save[$key] = $x;
+								
+								array_push($StoreList, $save);
+							}
+						}				
+					}
+					
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+												"StoreList" => $StoreList);
+				break;
+				
+				//USER SEES STORES RECOMENDED FROM AI
+				case 2:
+					//CODE TO REQUEST INFO FROM AI!!!!
+					//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
+					// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
+				
+					//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+					foreach($this->_dbSelect as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							//store Id is necessary to get more necessary data from DB, so we use an "if"
+							//to use this key value in all other select querys
+							if($key === "storeId")
+							{
+								$save[$key] = $x;
+								
+								$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+													FROM store s, location l
+													WHERE s.ID = l.IDStore
+													AND s.ID = ?', 
+													[$x]);
+													
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										foreach($Obj as $key => $y)
+										{
+											$location[$key] = $y;
+										}
+									}
+								}
+								else
+								{
+									$location = array("ERROR, location not found");
+								}
+
+								$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+													FROM item i, store s
+													WHERE s.ID = ?
+													AND i.IDStore = s.ID', 
+													[$x]);
+
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										$oneItem = [];
+										foreach($Obj as $key => $y)
+										{
+											$oneItem[$key] = $y;
+										}
+										array_push($items, $oneItem);
+									}
+								}
+								else
+								{
+									$items = array("ERROR, item not found");
+								}
+							}
+							else if($key === "storeName")
+							{
+								$save[$key] = $x;
+							}
+							else if($key === "StoreDescription")
+							{
+								$save['location'] = $location;
+								$save['items'] = $items;
+								$save[$key] = $x;
+								
+								array_push($StoreList, $save);
+							}
+						}				
+					}
+					
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+												"StoreList" => $StoreList);
+				/*switch($array["RequestType"])
 				{
 					case 1:
 						$this->_dbSelect = DB::select(
@@ -276,23 +398,9 @@ class SelectController extends Controller
 								cos( radians( l.longitude ) - radians(?) ) +
 								sin( radians(?) ) *
 								sin( radians( l.latitude ) ) ) ) <= $array["maxDistance"] 
-								AND l.ID = s.IDLocation 
-						ORDER BY name ASC', [$array["UserLatitude"], $array["UserLongitude"], $array["UserLatitude"]])->get();
-					break;
-					
-					//CONFIRMAR PONTO DE EXCLAMAÇÃO, LINHA 76!!!!!
-					case 2:
-						/*$this->_dbSelect = DB::select(
-						'SELECT s.name, s.type, s.description, l.latitude, l.longitude 
-						FROM store s, location l  
-						WHERE ( 6371 * acos( cos( radians(?) ) *
-								cos( radians( l.latitude ) ) *
-								cos( radians( l.longitude ) - radians(?) ) +
-								sin( radians(?) ) *
-								sin( radians( l.latitude ) ) ) ) <= $array["maxDistance"] 
-								AND l.ID = s.IDLocation 
-								AND s.type IN (".implode(',', array_fill(0, count($array["type"]), '?')).") 
-						ORDER BY name ASC', [$array["UserLatitude"], $array["UserLongitude"], $array["UserLatitude"]]);*/
+								AND s.ID = l.IDStore 
+						ORDER BY name ASC', [$array["MyLocation"]["latitude"], $array["MyLocation"]["longitude"], $array["MyLocation"]["latitude"]]);
+					*/
 					break;
 				}
 			break;

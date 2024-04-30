@@ -13,8 +13,8 @@ class WorkInProgressController extends Controller
 	{
 		$users = DB::select('SELECT * FROM users u');
 		$interests = DB::select('SELECT u.username, i.* FROM users u, interests i WHERE u.ID = i.IDUser');
-		print_r($users);
-		print_r($interests);
+		//print_r($users);
+		//print_r($interests);
 		return view('/DBTest', ['users' => $users]);
 	}
 	
