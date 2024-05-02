@@ -387,20 +387,6 @@ class SelectController extends Controller
 					
 					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
 												"StoreList" => $StoreList);
-				/*switch($array["RequestType"])
-				{
-					case 1:
-						$this->_dbSelect = DB::select(
-						'SELECT s.name, s.type, s.description, l.latitude, l.longitude 
-						FROM store s, location l  
-						WHERE ( 6371 * acos( cos( radians(?) ) *
-								cos( radians( l.latitude ) ) *
-								cos( radians( l.longitude ) - radians(?) ) +
-								sin( radians(?) ) *
-								sin( radians( l.latitude ) ) ) ) <= $array["maxDistance"] 
-								AND s.ID = l.IDStore 
-						ORDER BY name ASC', [$array["MyLocation"]["latitude"], $array["MyLocation"]["longitude"], $array["MyLocation"]["latitude"]]);
-					*/
 					break;
 				}
 			break;

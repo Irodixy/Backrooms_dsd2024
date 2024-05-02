@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
-class ControllerQueryUpdate extends Controller
+class UpdateController extends Controller
 {
 	private $_dbUpdate
 	private $_dbSelect

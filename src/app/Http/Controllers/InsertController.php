@@ -48,17 +48,79 @@ class InsertController extends Controller
 										"SuccessToken" => $SuccessToken);
 				}
 			break;
+			
 			//Interface 8 frontend::Feedback2Store ==> database::Feedback2Store
 			case 8:
-				DB::insert('insert into feedback (IDUser, IDStore, comment, rating) 
+				$save = [];
+			
+				//do a try (still not done)
+				$temporary = DB::select('SELECT ID AS userId
+									FROM users 
+									WHERE username = ?', 
+									[$array["CurrentUser"]]);
+				
+				foreach($temporary as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						$save[$key] = $x;
+					}
+				}
+			
+				$this->_dbInsert = DB::insert('insert into feedback (IDUser, IDStore, comment, rating) 
 							values (?, ?, ?, ?)', 
-							[$array["IDUser"], $array["IDStore"], $array["comment"], $array["rating"]]);
+							[$save["userId"], $array["Feedback"]["StoreId"], $array["Feedback"]["comment"], $array["Feedback"]["rating"]]);
+							
+				if($this->_dbInsert == 1)
+				{
+					$SuccessToken = true;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
+				else
+				{
+					$SuccessToken = false;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
 			break;
+			
 			//Interface 9 frontend::Feedback2Item ==> database::Feedback2Item
 			case 9:
-				DB::insert('INSERT into feedback (IDUser, IDItem, comment, rating) 
+				$save = [];
+			
+				//do a try (still not done)
+				$temporary = DB::select('SELECT ID AS userId
+									FROM users 
+									WHERE username = ?', 
+									[$array["CurrentUser"]]);
+				
+				foreach($temporary as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						$save[$key] = $x;
+					}
+				}
+			
+				$this->_dbInsert = DB::insert('INSERT into feedback (IDUser, IDItem, comment, rating) 
 							values (?, ?, ?, ?)', 
-							[$array["IDUser"], $array["IDItem"], $array["comment"], $array["rating"]]);
+							[$save["userId"], $array["Feedback"]["ItemId"], $array["Feedback"]["comment"], $array["Feedback"]["rating"]]);
+							
+				if($this->_dbInsert == 1)
+				{
+					$SuccessToken = true;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
+				else
+				{
+					$SuccessToken = false;
+					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+										"SuccessToken" => $SuccessToken);
+				}
 			break;
 			//Interface 12 frontend::Registration ==> database::Registration
 			case 12:
