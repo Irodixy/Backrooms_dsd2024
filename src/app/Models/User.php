@@ -20,6 +20,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'type', 
+        'bday', 
+        'IDInterests',
     ];
 
     /**
@@ -31,6 +34,27 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    // Relações
+    public function interests()
+    {
+        return $this->belongsTo(Interests::class, 'IDInterests', 'ID');
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'IDUser', 'ID');
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'IDUser', 'ID');
+    }
+
+    public function huntedStores()
+    {
+        return $this->hasMany(HuntedStore::class, 'IDUser', 'ID');
+    }
 
     /**
      * Get the attributes that should be cast.
