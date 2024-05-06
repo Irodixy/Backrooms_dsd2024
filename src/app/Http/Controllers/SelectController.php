@@ -138,10 +138,76 @@ class SelectController extends Controller
 			//Interface 23 web::Management ==> database::Administrator
 			//SHOW STORE INFO TO ADMIN
 			case 23:
-			$query = 'SELECT store.name, store.type, store.description, location.*
-												FROM store
-												JOIN location ON users.IDLocation = location.ID';
-				$this->_dbSelect = DB::select($query);
+				$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, s.ID, s.name AS StoreName
+									FROM users u, store s
+									WHERE s.IDOwner = u.ID');
+
+				$StoreData = [];
+				$save = [];
+				$StoreLocation = [];
+				$AvgRate = [];			
+					
+				foreach($this->_dbSelect as $Obj)
+				{
+					$i = 0;
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						if($key != "ID")
+						{
+							$save[$key] = $x;
+						}
+						else 
+						{
+							$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+												FROM store s, location l
+												WHERE s.ID = l.IDStore
+												AND s.ID = ?', 
+												[$x]);
+												
+							foreach($temporary as $Objs)
+							{
+								//Here we separete each result from DB in their diferent keys and values
+								foreach($Objs as $keys => $y)
+								{
+									$StoreLocation[$keys] = $y;
+								}
+							}
+							
+							$temporary = DB::select('SELECT AVG(rating) AS AvgRate
+												FROM store s, feedback f
+												WHERE s.ID = f.IDStore
+												AND s.ID = ?', 
+												[$x]);
+												
+							foreach($temporary as $Objs)
+							{
+								//Here we separete each result from DB in their diferent keys and values
+								foreach($Objs as $keys => $y)
+								{
+									$AvgRate[$keys] = $y;
+								}
+							}
+							
+							$save["StoreLocation"] = $StoreLocation;
+							$save["AvgRate"] = $AvgRate;
+						}
+
+						if($i >= 3)
+						{
+							array_push($StoreData, $save);
+							$i = 0;
+						}
+						else
+						{
+							$i++;
+						}
+						
+					}
+				}
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+										"StoreData" => $StoreData);
 			break;
 			
 			//Interface 5 database::HuntedStore ==> frontend::HuntedStore
@@ -394,22 +460,193 @@ class SelectController extends Controller
 			//Interface 20 web::Management ==> database::Administrator
 			//SHOW USER_X CUSTOMER_X(S) INFO
 			case 20:
+				$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.bday AS Birthday, u.email AS Email
+												FROM users u');
+				
+				$UserData = [];
+				$save = [];
+				$Interests = [];	
+					
+				foreach($this->_dbSelect as $Obj)
+				{
+					$i = 0;
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						if($key != "ID")
+						{
+							$save[$key] = $x;
+						}
+						else 
+						{
+							$save[$key] = $x;
+							
+							$temporary = DB::select('SELECT i.*
+												FROM users u, interests i
+												WHERE u.ID = ?
+												AND u.ID = i.IDUser',
+												[$x]);
+												
+							foreach($temporary as $Objs)
+							{
+								//Here we separete each result from DB in their diferent keys and values
+								foreach($Objs as $keys => $y)
+								{
+									$Interests[$keys] = $y;
+								}
+							}
+							
+							$save["Interests"] = $Interests;
+						}
+
+						if($i >= 3)
+						{
+							array_push($UserData, $save);
+							$i = 0;
+						}
+						else
+						{
+							$i++;
+						}
+					}
+				}
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+										"UserData" => $UserData);
+			break;
+			
 			//Interface11 database::Customer ==> frontend:: Customer
 			//SHOW USER THEIR INFO
 			case 11:
-				$this->_dbSelect = DB::select('SELECT u.*, i.*
+				$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.bday AS Birthday
 												FROM users u
-												JOIN interests i ON u.IDInterests = i.ID');
+												WHERE u.username = ?',
+												[$array["CurrentUser"]]);
+				
+				$save = [];
+				$Interests = [];	
+					
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						if($key != "ID")
+						{
+							$save[$key] = $x;
+						}
+						else
+						{
+							$temporary[$key] = $x;
+						}
+					}
+				}
+
+				$this->_dbSelect = DB::select('SELECT i.*
+												FROM users u, interests i
+												WHERE u.ID = ?
+												AND u.ID = i.IDUser',
+												[$temporary["ID"]]);
+												
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						$Interests[$key] = $x;
+					}
+				}
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+												"UserName" => $save["UserName"], "Birthday" => $save["Birthday"], 
+												"Interests" => $Interests);
+					
 			break;
 			
 			//Interface 14 database::Customer ==> algorithm::user
 			//SHOW TO ALGORITHM THE INTERESTS OF USER
-			case 14:
-				$this->_dbSelect = DB::select('SELECT u.ID, i.*
+			case 14:						
+				//Select info of USER
+				$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
 												FROM users u
-												JOIN interests i ON u.IDInterests = i.ID
-												WHERE u.ID = ?', 
-												[$array["IDUser"]]);
+												WHERE u.username = ?', 
+												[$array["CurrentUser"]]);
+				
+				//Variables to save data and help reorganize the future JSON file			
+				$UserData = [];
+				$Interests = [];
+				$HuntedStoreIdList = [];
+				$save = [];
+					
+				//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						//store Id is necessary to get more necessary data from DB, so we use an "if"
+						//to use this key value in all other select querys
+						if($key === "UserId")
+						{
+							$save[$key] = $x;
+							
+							$temporary = DB::select('SELECT i.*
+												FROM users u, interests i
+												WHERE u.ID = ?
+												AND u.ID = i.IDUser', 
+												[$x]);
+												
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
+								{
+									foreach($Obj as $key => $y)
+									{
+										$Interests[$key] = $y;
+									}
+								}
+							}
+							else
+							{
+								$Interests = "ERROR, interests not found";
+							}
+
+							$temporary = DB::select('SELECT IDStore AS StoreId, date_time AS VisitTime
+												FROM huntedstore
+												WHERE IDUser = ?', 
+												[$x]);
+
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
+								{
+									$oneSearch = [];
+									foreach($Obj as $key => $y)
+									{
+										$oneSearch[$key] = $y;
+									}
+									array_push($HuntedStoreIdList, $oneSearch);
+								}
+							}
+							else
+							{
+								$HuntedStoreIdList = array("ERROR, item not found");
+							}
+						}
+						else 
+						{
+							$save[$key] = $x;
+						}
+					}				
+				}
+				
+				$save['Interests'] = $Interests;
+				$save['HuntedStoreIdList'] = $HuntedStoreIdList;
+
+				array_push($UserData, $save);
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+											"UserData" => $UserData);
 			break;
 			
 			//NEED TO UPDATE -> KNOW MORE ABOUT!
@@ -420,6 +657,30 @@ class SelectController extends Controller
 												FROM item i
 												WHERE ??????????', 
 												[????????????????]);*/
+			break;
+			
+			case 17:
+				$this->_dbSelect = DB::select('SELECT s.ID AS StoreId, f.comment, f.rating
+												FROM feedback f, users u, store s
+												WHERE u.username = ?
+												AND u.ID = f.IDUser
+												AND s.ID = f.IDStore 
+												AND f.IDStore IS NOT NULL', [$array["CurrentUser"]]);
+	
+				$Feedback = [];	
+				
+				foreach($this->_dbSelect as $Obj)
+				{
+					$oneFeedback = [];
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						$oneFeedback[$key] = $x;
+					}
+					array_push($Feedback, $oneFeedback);
+				}
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+										"Feedback" => $Feedback);
 			break;
 			
 			//Interface 26 web::Analytics ==> database::Analytics

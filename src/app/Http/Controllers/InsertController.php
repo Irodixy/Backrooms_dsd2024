@@ -127,22 +127,33 @@ class InsertController extends Controller
 			//Interface 18	web::Registration ==> database::Registration
 			case 18:
 			//REGISTRATION OF USER
-				$check = DB::select('SELECT username
+				$temporary = DB::select('SELECT username
 									FROM users
 									WHERE username = ?', 
-									[$array["username"]]);
-				if($check == 0)
+									[$array["UserName"]]);
+				if(!$temporary)
 				{
-					DB::insert('INSERT into users (username, password, bday, type) 
-							values (?, ?, ?, ?)', 
-							[$array["username"], $array["password"], $array["bday"], $array["type"]]);
+					$this->_dbInsert = DB::insert('INSERT into users (username, password) 
+										values (?, ?)', 
+										[$array["UserName"], $array["PassWord"]]);
+										
+					if($this->_dbInsert == 1)
+					{
+						$SuccessToken = true;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+											"SuccessToken" => $SuccessToken);
+					}
+					else
+					{
+						$SuccessToken = false;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+											"SuccessToken" => $SuccessToken);
+					}
 				}
 				else
 				{
-					return "ERROR";
+					$this->_newArray = "ERROR, username already exists";
 				}
-				
-				return $token = true;
 			break;
 
 			//Interface 24 web::Management ==> database::Administrator

@@ -6,11 +6,12 @@ use Illuminate\Support\Facades\DB;
 
 class UpdateController extends Controller
 {
-	private $_dbUpdate
-	private $_dbSelect
+	private $_dbUpdate;
+	private $_newArray;
 	
 	public function QueryUpdate($ID, $array)
 	{
+		$SuccessToken = "";
 		switch($ID)
 		{
 			//Interface 21 web::Management ==> database::Administrator (Update userData)
@@ -19,35 +20,51 @@ class UpdateController extends Controller
 			//Interface 10 frontend::Customer ==> database:: Customer
 			//USER UPDATES THEIR INFO
 			case 10:
-				$this->_dbSelect = DB::select('SELECT ID
+				$temporary = DB::select('SELECT ID
 												FROM users 
-												WHERE array_keys($array)[2]=? and array_keys($array)[3]=?', 
-												[$array["username"], $array["password"]]);
-				if (count($this->_dbSelect) == 1)
+												WHERE username = ? and password = ?', 
+												[$array["UserName"], $array["PassWord"]]);
+
+				if (count($temporary) == 1)
 				{
 					//i.array_keys($array["interests"])[?] = ?, -> dependes of how many interest it is.
-					//Possible UPDATE!!!! ->build IT before going in here! 
-					$this->_dbUpdate = DB::update('UPDATE users u, interests i
-													SET u.array_keys($array)[2] = ?, 
-													u.array_keys($array)[3] = ?, 
-													u.array_keys($array)[4] = ?, 
-													i.array_keys($array["interests"])[0] = ?, 
-													i.array_keys($array["interests"])[1] = ?, 
-													i.array_keys($array["interests"])[2] = ?, 
-													(...)
-													WHERE u.ID = ?
-                                                    AND u.IDInterests = i.ID', 
-										[$array["array_keys($array)[2]"], $array["password"], $array["bday"], 
-										$array["interests"][0], $array["interests"][1], $array["interests"][2], $this->_dbSelect]);
+					//Possible UPDATE!!!! ->build IT before going in here!
+					
+					$query = new QueryBuilderController();
+					$string = $query -> StringBuilder("UPDATE", $ID, $array);
+					foreach ( $temporary as $x)
+					{
+						foreach ($x as $y)
+						{
+							$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+						}
+					}
+					print_r($values);
+					echo $string;
+					
+					$this->_dbUpdate = DB::update($string, $values);
+					
+					if($this->_dbUpdate == 1)
+					{
+						$SuccessToken = true;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+											"SuccessToken" => $SuccessToken);
+					}
+					else
+					{
+						$SuccessToken = false;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+											"SuccessToken" => $SuccessToken);
+					}
 				}
 				else
 				{
-					return "ERROR";
+					$this->_dbUpdate = "ERROR, User not Found!";
 				}
 			break;
 			
 			//UPDATE BY ADMIN OF OWNER ACCOUNT + STORE AND LOCATION
-			case ??:
+			/*case ??:
 				$this->_dbSelect = DB::select('SELECT ID
 												FROM users 
 												WHERE ID = ?', 
@@ -84,8 +101,9 @@ class UpdateController extends Controller
 				{
 					return "ERROR";
 				}
-			break;
+			break;*/
 		}
+		return $newArray = $this->_newArray;
 	}
 }
 ?>

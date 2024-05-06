@@ -9,7 +9,7 @@ class IdentifyInterface extends Controller
 {
 	public function InterfaceID($ID, $array) 
 	{
-		if($ID==1 or $ID==3 or $ID==5 or $ID==6 or $ID==7 or $ID==11 or $ID==13 or $ID==14 or $ID==15 or $ID==19 or $ID==20 or $ID==28)
+		if($ID==1 or $ID==3 or $ID==5 or $ID==6 or $ID==7 or $ID==11 or $ID==13 or $ID==14 or $ID==15 or $ID==17 or $ID==19 or $ID==20 or $ID==28)
 		{
 			$ObjSelect = new SelectController();
 			$newArray = $ObjSelect->QuerySelect($ID, $array);
@@ -23,12 +23,15 @@ class IdentifyInterface extends Controller
 		}
 		else if($ID==10 or $ID==21)
 		{
-			$ObjUpdate = new ControllerQueryUpdate($ID, $array);
-			return $ObjUpdate;
+			$ObjUpdate = new UpdateController();
+			$newArray = $ObjUpdate->QueryUpdate($ID, $array);
+			return ($newArray);
 		}
 		else if($ID==22)
 		{
-			
+			$ObjDelete = new DeleteController();
+			$newArray = $ObjDelete->QueryDelete($ID, $array);
+			return ($newArray);
 		}
 	}
 }
