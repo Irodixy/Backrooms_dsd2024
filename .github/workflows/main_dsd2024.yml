@@ -63,4 +63,4 @@ jobs:
           app-name: 'dsd2024'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_35A2141271F64A73BE4DD76398F722C9 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FF7905DE4D7143B9885C84AF44C527FF }}
