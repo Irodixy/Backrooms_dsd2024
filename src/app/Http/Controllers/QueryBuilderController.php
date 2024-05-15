@@ -25,12 +25,40 @@ class QueryBuilderController extends Controller
 						$add = strtolower($key);
 						$newString = $newString . "u." . "$add = ?, ";
 					}
-					if ($key == "Interests")
+					else if ($key == "Interests")
 					{
 						foreach ($x as $keys => $y)
 						{
 							$add = strtolower($keys);
 							$newString = $newString . "i." . "$add = ?, ";
+						}
+					}
+				}
+				$newString = substr($newString, 0, -2);
+				$newString = $newString . " WHERE u.ID = ? AND u.ID = i.IDUser";
+				return $newString;
+			}
+			else if ($id == 32)
+			{
+				$newString = $type . " users u, store s SET ";
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if ($key == "StoreName")
+					{
+							$add = strtolower($key);
+							$newString = $newString . "s." . "$add = ?, ";
+					}
+					else if ($key == "StoreLocation")
+					{
+						foreach ($x as $keys => $y)
+						{
+							$add = strtolower($keys);
+							$newString = $newString . "s." . "$add = ?, ";
 						}
 					}
 				}

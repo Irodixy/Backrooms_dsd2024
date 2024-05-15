@@ -146,7 +146,7 @@ class SelectController extends Controller
 				$save = [];
 				$StoreLocation = [];
 				$AvgRate = [];			
-					
+				print_r($this->_dbSelect);
 				foreach($this->_dbSelect as $Obj)
 				{
 					$i = 0;
@@ -185,7 +185,7 @@ class SelectController extends Controller
 								//Here we separete each result from DB in their diferent keys and values
 								foreach($Objs as $keys => $y)
 								{
-									$AvgRate[$keys] = $y;
+									$AvgRate = $y;
 								}
 							}
 							
@@ -271,8 +271,6 @@ class SelectController extends Controller
 											"ItemList" => $temporary);
 			break;
 			
-			//Interface 13 database::Store ==> algorithm::Store
-			case 13:
 			//Interface 7 frontend::Map ==> database::Map
 			case 7:
 			//SHOW STORES AROUND X DISTANCE FROM USER
@@ -380,6 +378,9 @@ class SelectController extends Controller
 					//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
 					// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
 				
+				
+				//SELECT FOR INTERFACE 13!!!!!!
+				
 					//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
 					foreach($this->_dbSelect as $Obj)
 					{
@@ -392,27 +393,6 @@ class SelectController extends Controller
 							{
 								$save[$key] = $x;
 								
-								$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-													FROM store s, location l
-													WHERE s.ID = l.IDStore
-													AND s.ID = ?', 
-													[$x]);
-													
-								if(count($temporary) > 0)
-								{						
-									foreach($temporary as $Obj)
-									{
-										foreach($Obj as $key => $y)
-										{
-											$location[$key] = $y;
-										}
-									}
-								}
-								else
-								{
-									$location = array("ERROR, location not found");
-								}
-
 								$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
 													FROM item i, store s
 													WHERE s.ID = ?
@@ -442,7 +422,6 @@ class SelectController extends Controller
 							}
 							else if($key === "StoreDescription")
 							{
-								$save['location'] = $location;
 								$save['items'] = $items;
 								$save[$key] = $x;
 								
@@ -451,8 +430,102 @@ class SelectController extends Controller
 						}				
 					}
 					
-					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-												"StoreList" => $StoreList);
+					$newArray = array("InterfaceId" => 13, "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
+					
+					$pickStores = new IdentifyInterface();
+					$pickStores->InterfaceID($newArray["InterfaceId"], $newArray);
+					
+					
+					//Select info of USER FOR INTERFACE 14
+					
+					$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
+													FROM users u
+													WHERE u.username = ?', 
+													[$array["CurrentUser"]]);
+					
+					//Variables to save data and help reorganize the future JSON file			
+					$UserData = [];
+					$Interests = [];
+					$HuntedStoreIdList = [];
+					$save = [];
+						
+					//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+					foreach($this->_dbSelect as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							//store Id is necessary to get more necessary data from DB, so we use an "if"
+							//to use this key value in all other select querys
+							if($key === "UserId")
+							{
+								$save[$key] = $x;
+								
+								$temporary = DB::select('SELECT i.*
+													FROM users u, interests i
+													WHERE u.ID = ?
+													AND u.ID = i.IDUser', 
+													[$x]);
+													
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										foreach($Obj as $key => $y)
+										{
+											$Interests[$key] = $y;
+										}
+									}
+								}
+								else
+								{
+									$Interests = "ERROR, interests not found";
+								}
+
+								$temporary = DB::select('SELECT IDStore AS StoreId, date_time AS VisitTime
+													FROM huntedstore
+													WHERE IDUser = ?', 
+													[$x]);
+
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										$oneSearch = [];
+										foreach($Obj as $key => $y)
+										{
+											$oneSearch[$key] = $y;
+										}
+										array_push($HuntedStoreIdList, $oneSearch);
+									}
+								}
+								else
+								{
+									$HuntedStoreIdList = array("ERROR, item not found");
+								}
+							}
+							else 
+							{
+								$save[$key] = $x;
+							}
+						}				
+					}
+					
+					$save['Interests'] = $Interests;
+					$save['HuntedStoreIdList'] = $HuntedStoreIdList;
+
+					array_push($UserData, $save);
+					
+					$newArray = array("InterfaceId" => 14, "CurrentUser" => $array["CurrentUser"],
+												"UserData" => $UserData);
+											
+					$pickUser = new IdentifyInterface();
+					$pickUser->InterfaceID($newArray["InterfaceId"], $newArray);
+					
+					//AFTER SENDING ALL THE NEED INFO, REQUEST A GET TO RECEIVE THE NECESSARY RECOMMENDATION!!!
+					
+					$getRecommendation = new IdentifyInterface();
+					$this->_newArray = $getRecommendation->InterfaceID(16);
 					break;
 				}
 			break;
@@ -565,7 +638,7 @@ class SelectController extends Controller
 			
 			//Interface 14 database::Customer ==> algorithm::user
 			//SHOW TO ALGORITHM THE INTERESTS OF USER
-			case 14:						
+			/*case 14:						
 				//Select info of USER
 				$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
 												FROM users u
@@ -647,7 +720,7 @@ class SelectController extends Controller
 				
 				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
 											"UserData" => $UserData);
-			break;
+			break;*/
 			
 			//NEED TO UPDATE -> KNOW MORE ABOUT!
 			//Interface 15 database::Item ==> algorithm::recommendation algorithm
@@ -659,7 +732,7 @@ class SelectController extends Controller
 												[????????????????]);*/
 			break;
 			
-			case 17:
+			/*case 17:
 				$this->_dbSelect = DB::select('SELECT s.ID AS StoreId, f.comment, f.rating
 												FROM feedback f, users u, store s
 												WHERE u.username = ?
@@ -681,7 +754,7 @@ class SelectController extends Controller
 				}
 				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
 										"Feedback" => $Feedback);
-			break;
+			break;*/
 			
 			//Interface 26 web::Analytics ==> database::Analytics
 			//ADMIN SEES SELECT RATINGS TO REFLECT
@@ -692,6 +765,109 @@ class SelectController extends Controller
 												AND u.username = ?', 
 												[$array["CurrentUser"]]);
 			break;
+			
+			case 27:
+				$this->_dbSelect = DB::select('SELECT s.ID, s.name AS StoreName
+												FROM users u, store s 
+												WHERE u.username = ?
+												AND s.IDOwner = u.ID', 
+												[$array["UserName"]]);
+												
+				$location = [];
+				$Feedback = [];
+					$save = [];
+												
+				//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						//store Id is necessary to get more necessary data from DB, so we use an "if"
+						//to use this key value in all other select querys
+						if($key === "ID")
+						{
+							$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+													FROM store s, location l
+													WHERE s.ID = l.IDStore
+													AND s.ID = ?', 
+													[$x]);
+												
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
+								{
+									foreach($Obj as $key => $y)
+									{
+										$location[$key] = $y;
+									}
+								}
+							}
+							else
+							{
+								$location = "ERROR, location not found";
+							}
+
+							$temporary = DB::select('SELECT AVG(rating) AS AvgRate
+													FROM store s, feedback f
+													WHERE s.ID = f.IDStore
+													AND s.ID = ?', 
+													[$x]);
+							
+							if(count($temporary) > 0)
+							{							
+								foreach($temporary as $Objs)
+								{
+									//Here we separete each result from DB in their diferent keys and values
+									foreach($Objs as $keys => $y)
+									{
+										$AvgRate = $y;
+									}
+								}
+							}
+							else
+							{
+								$AvgRate = array("ERROR, Average not possible to calculate");
+							}
+							
+							$temporary = DB::select('SELECT 
+													FROM item i, store s
+													WHERE s.ID = ?
+													AND i.IDStore = s.ID', 
+													[$x]);
+
+								if(count($temporary) > 0)
+								{						
+									foreach($temporary as $Obj)
+									{
+										$oneFeedback = [];
+										foreach($Obj as $key => $y)
+										{
+											$oneFeedback[$key] = $y;
+										}
+										array_push($Feedback, $oneFeedback);
+									}
+								}
+								else
+								{
+									$Feedback = array("ERROR, Feedbacks not found");
+								}
+						}
+						else
+						{
+							$save[$key] = $x;
+							$save['StoreLocation'] = $location;
+							$save['AvgRate'] = $AvgRate;
+							$save['Feedback'] = $Feedback;
+
+							array_push($StoreList, $save);
+						}
+					}				
+				}
+				
+				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
+											"StoreList" => $StoreList);
+		break;
 			
 			case 28:
 				$this->_dbSelect = DB::select('SELECT u.username, s.name, i.name, f.comment, f.rating, f.date

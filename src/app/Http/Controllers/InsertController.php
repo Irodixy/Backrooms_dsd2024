@@ -77,6 +77,10 @@ class InsertController extends Controller
 					$SuccessToken = true;
 					$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
 										"SuccessToken" => $SuccessToken);
+			
+					$array["InterfaceId"] = 17;
+					$sendFeedbackStore = new IdentifyInterface();
+					$sendFeedbackStore->InterfaceID($array["InterfaceId"], $array);
 				}
 				else
 				{

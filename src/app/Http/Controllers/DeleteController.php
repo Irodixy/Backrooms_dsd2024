@@ -23,23 +23,32 @@ class DeleteController extends Controller
 				if($this->_dbDelete == 1)
 					{
 						$SuccessToken = true;
-						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-											"SuccessToken" => $SuccessToken);
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
 					}
 					else
 					{
 						$SuccessToken = false;
-						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-											"SuccessToken" => $SuccessToken);
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
 					}
 			break;
 			
 			//Interface 25 web::Management ==> database::Administrator
 			//ADMIN DELETE STORE DATA
 			case 25:
-				DB::delete('DELETE FROM users
-							WHERE ID = ?',
-							[$array["UserId"]]);
+				$this->_dbDelete = DB::delete('DELETE FROM users
+												WHERE ID = ?',
+												[$array["UserId"]]);
+							
+				if($this->_dbDelete == 1)
+					{
+						$SuccessToken = true;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+					}
+					else
+					{
+						$SuccessToken = false;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+					}
 			break;
 		}
 		return $newArray = $this->_newArray;

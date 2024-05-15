@@ -15,9 +15,18 @@ use App\Http\Controllers\Api\V1\ConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+Route::prefix('vTest')->group(function(){  
+
+});
+
 Route::prefix('v1')->group(function(){  
     
-    // Rotas para User
+	/*// Testing for AI POST
+    Route::apiResource('AIPost', TEST1Controller::class);*/
+
+	
+	// Rotas para User
     Route::apiResource('users', UserController::class);
 
     // Rotas para Item

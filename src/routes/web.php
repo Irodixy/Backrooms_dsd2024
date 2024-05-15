@@ -8,6 +8,8 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\WorkInProgressController;
 use App\Http\Controllers\SetController;
 
+use App\Http\Controllers\API\V1\UserController as User;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -16,7 +18,7 @@ Route::get('/DBTest', [WorkInProgressController::class, 'index']);
 Route::post('/DBTest', [SetController::class, 'prepareFile']);
 
 Route::get('/show', [SetController::class, 'prepareFile']);
-
+//Route::get('/show', [User::class, 'index']);
 
 /*Route::get('/dashboard', function () {
     return view('dashboard');

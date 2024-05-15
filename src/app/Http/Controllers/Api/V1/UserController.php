@@ -17,7 +17,10 @@ class UserController extends Controller
      */
     public function index()
     {
-        return UserResource::collection(User::all());
+		//$jsonString = UserResource::collection(User::all());
+		//dd($jsonString);
+        //return view('show', ['jsonString' => $jsonString]);
+		return UserResource::collection(User::all());
     }
 
     /**

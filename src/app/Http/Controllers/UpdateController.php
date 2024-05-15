@@ -63,6 +63,49 @@ class UpdateController extends Controller
 				}
 			break;
 			
+			case 32:
+				$temporary = DB::select('SELECT ID
+										FROM users 
+										WHERE username = ? and password = ?', 
+										[$array["UserName"], $array["UserPassword"]]);
+
+				if (count($temporary) == 1)
+				{
+					//i.array_keys($array["interests"])[?] = ?, -> dependes of how many interest it is.
+					//Possible UPDATE!!!! ->build IT before going in here!
+					
+					$query = new QueryBuilderController();
+					$string = $query -> StringBuilder("UPDATE", $ID, $array);
+					foreach ( $temporary as $x)
+					{
+						foreach ($x as $y)
+						{
+							$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+						}
+					}
+					print_r($values);
+					echo $string;
+					
+					$this->_dbUpdate = DB::update($string, $values);
+					
+					if($this->_dbUpdate == 1)
+					{
+						$SuccessToken = true;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+					}
+					else
+					{
+						$SuccessToken = false;
+						$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+					}
+				}
+				else
+				{
+					$this->_dbUpdate = "ERROR, User not Found!";
+				}
+			
+			break;
+			
 			//UPDATE BY ADMIN OF OWNER ACCOUNT + STORE AND LOCATION
 			/*case ??:
 				$this->_dbSelect = DB::select('SELECT ID
