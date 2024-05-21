@@ -7,19 +7,47 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerProfileController extends Controller
 {
+	private $_dbSelect;
+	private $_dbInsert;
+	private $_dbUpdate;
+	private $_dbDelete;
+	private $_newArray;
+	
+	function UpdateOrInsert (Request $array)
+	{
+		$input = $array->all();
+		$this->_dbSelect = DB::select('SELECT ID
+										FROM users 
+										WHERE ID = ?', 
+										[$input["UserId"]]);
+
+		if(count($this->_dbSelect) == 1)
+		{
+			return $this->UpdateOwner($input);
+		}
+		else if(count($this->_dbSelect) == 0)
+		{
+			return $this->InsertOwner($input);
+		}
+		else
+		{
+			return "Something went wrong, please try again later";
+		}
+		
+	}
+	
     function SeeOwner($ownerName = "")
 	{
 		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, s.ID, s.name AS StoreName
 									FROM users u, store s
 									WHERE s.IDOwner = u.ID
-									AND u.username = ?',
+									AND u.username LIKE ?',
 									['%' . $ownerName . '%']);
 
 		$StoreData = [];
 		$save = [];
 		$StoreLocation = [];
 		$AvgRate = [];			
-		print_r($this->_dbSelect);
 		foreach($this->_dbSelect as $Obj)
 		{
 			$i = 0;
@@ -77,21 +105,20 @@ class OwnerProfileController extends Controller
 				}
 			}
 		}
-		$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"],
-								"StoreData" => $StoreData);
-		return $newArray = $this->_newArray;
+		$newArray = array("StoreData" => $StoreData);
+		return $newArray;
 	}
 	
-	function UpdateUser (Request $array)
+	function UpdateOwner ($array)
 	{
-		$temporary = DB::select('SELECT ID
-										FROM users 
-										WHERE username = ? and password = ?', 
-										[$array["UserName"], $array["UserPassword"]]);
+		$temporary = DB::select('SELECT username
+								FROM users 
+								WHERE ID = ?', 
+								[$array["UserId"]]);
 
 		if (count($temporary) == 1)
 		{
-			//Possible UPDATE!!!! ->build IT before going in here!
+			$ID = 24;
 			
 			$query = new QueryBuilderController();
 			$string = $query -> StringBuilder("UPDATE", $ID, $array);
@@ -99,33 +126,31 @@ class OwnerProfileController extends Controller
 			{
 				foreach ($x as $y)
 				{
-					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+					$values = $query -> ArrayBuilder("UPDATE", $ID, $array["UserId"], $array);
 				}
 			}
-			print_r($values);
-			echo $string;
 			
 			$this->_dbUpdate = DB::update($string, $values);
 			
 			if($this->_dbUpdate == 1)
 			{
 				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+				$newArray = array("SuccessToken" => $SuccessToken);
 			}
 			else
 			{
 				$SuccessToken = false;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "SuccessToken" => $SuccessToken);
+				$newArray = array("SuccessToken" => $SuccessToken);
 			}
 		}
 		else
 		{
-			$this->_dbUpdate = "ERROR, User not Found!";
+			$newArray = "ERROR, User not Found!";
 		}
-		return $newArray = $this->_newArray;	
+		return $newArray;
 	}
 	
-	function InsertUser (Request $array)
+	function InsertOwner ($array)
 	{
 		$temporary = DB::select('SELECT username
 									FROM users
@@ -149,7 +174,7 @@ class OwnerProfileController extends Controller
 			$this->_dbInsert = DB::insert('INSERT into store
 											(name, type) 
 											VALUES (?, ?, ?, ?)', 
-											[$array["storeName"], $array["storeType"]);
+											[$array["storeName"], $array["storeType"]]);
 											
 			if($this->_dbInsert == 1)
 			{
@@ -199,21 +224,21 @@ class OwnerProfileController extends Controller
 		}
 	}
 	
-	function DeleteUser ($UserId)
+	function DeleteOwner (Request $array)
 	{
 		$this->_dbDelete = DB::delete('DELETE FROM users
 												WHERE ID = ?',
-												[$UserId]);
+												[$array["UserId"]]);
 												
 		if($this->_dbDelete == 1)
 			{
 				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => 22, "SuccessToken" => $SuccessToken);
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 			else
 			{
 				$SuccessToken = false;
-				$this->_newArray = array("InterfaceId" => 22, "SuccessToken" => $SuccessToken);
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 		return $newArray = $this->_newArray;
 	}

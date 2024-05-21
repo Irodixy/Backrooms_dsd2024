@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\DB;
 
 class SearchStore extends Controller
 {
+	private $_dbSelect;
+	private $_newArray;
 	
-    function SearchStore($storeName = "")
+    function SearchStore(Request $array)
 	{
-		
+		$input = $array->all();
 		$MatchToken = "";
 		$temporary = [];
 		
@@ -18,7 +20,7 @@ class SearchStore extends Controller
 				$this->_dbSelect = DB::select('SELECT s.ID AS storeId, s.name AS storeName, s.type, s.description AS StoreDescription 
 												FROM store s
 												WHERE s.name LIKE ?', 
-												['%' . $storeName . '%']);
+												['%' . $input["storeName"] . '%']);
 				
 				//Variables to save data and help reorganize the future JSON file			
 				$StoreList = [];
@@ -96,11 +98,8 @@ class SearchStore extends Controller
 						}
 					}				
 				}
-		return $StoreList;
-	}
-	
-	function getData()
-	{
-		return ["name" => "Goncas"];
+		$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"] ,"StoreList" => $StoreList);
+		
+		return $newArray = $this->_newArray;
 	}
 }

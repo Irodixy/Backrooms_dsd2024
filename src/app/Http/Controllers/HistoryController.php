@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class HistoryController extends Controller
 {
-    function SeeHistory ($CurrentUser)
+	private $_dbSelect;
+	
+    function SeeHistory (Request $array)
 	{
+		$input = $array->all();
 		$temporary = [];
 		
 		$this->_dbSelect = DB::select('SELECT s.ID, s.name, h.date_time 
@@ -16,7 +19,7 @@ class HistoryController extends Controller
 												WHERE u.username = ? 
 												AND u.ID = h.IDUser 
 												AND h.IDStore = s.ID', 
-												[$CurrentUser]);
+												[$input["CurrentUser"]]);
 												
 		if(count($this->_dbSelect) > 0)
 		{						
@@ -35,8 +38,7 @@ class HistoryController extends Controller
 			$temporary = array("ERROR, no History to show");
 		}
 					
-		$this->_newArray = array("InterfaceId" => 5, "CurrentUser" => $CurrentUser,
-									"HuntedStoreIdList" => $temporary);
+		$this->_newArray = array("InterfaceId" => 5, "CurrentUser" => $input["CurrentUser"], "HuntedStoreIdList" => $temporary);
 		return $newArray = $this->_newArray;
 	}
 }

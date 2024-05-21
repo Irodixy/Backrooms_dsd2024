@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 
 class StoreController extends Controller
 {
+	private $_dbInsert;
+	
     function SeeStore ($storeName)
 	{
 		$temporary = [];
@@ -99,6 +101,7 @@ class StoreController extends Controller
 	
 	function SaveHistory(Request $array) 
 	{
+		$input = $array->all();
 		$SuccessToken = "";
 		$save = [];
 			
@@ -106,7 +109,7 @@ class StoreController extends Controller
 		$temporary = DB::select('SELECT ID AS userId
 							FROM users 
 							WHERE username = ?', 
-							[$array["CurrentUser"]]);
+							[$input["CurrentUser"]]);
 		
 		foreach($temporary as $Obj)
 		{
@@ -117,19 +120,17 @@ class StoreController extends Controller
 			}
 		}
 		
-		$this->_dbInsert = DB::insert('INSERT into huntedstore (IDUser, IDStore) values(?, ?)', 
-										[$save["userId"], $array["HuntedStoreIdList"]]);
+		$this->_dbInsert = DB::insert('INSERT INTO huntedstore (IDUser, IDStore) values(?, ?)', 
+										[$save["userId"], $input["HuntedStoreIdList"]["StoreId"]);
 		if($this->_dbInsert == 1)
 		{
 			$SuccessToken = true;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $array["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);
 		}
 		else
 		{
 			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $array["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;
 	}

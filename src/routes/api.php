@@ -19,51 +19,76 @@ use App\Http\Controllers\OwnerProfileController as OwnerProfile;
 use App\Http\Controllers\RegistrationCustomerController as RegistrationCustomer;
 use App\Http\Controllers\RegistrationOwnerController as RegistrationOwner;
 
-Route::get('test', [tests::class, 'sendPutProfileCustomer']);
+/******* TESTING POSTS!!! ********/
+
+//POST FOR LOGIN!!!!!!!
+Route::get('test_login', [tests::class, 'sendPostLogin']);
+
+//POST FOR SEARCH STORE!!!!
+Route::get('test_search_store/{type?}', [tests::class, 'sendPostSearchStore']);
+
+//POST FOR DISPLAY SEARCH_HISTORY!!!!
+Route::get('test_history', [tests::class, 'sendPostHistory']);
+
+//POST FOR UPDATE CUSTOMER!!!!!
+Route::get('test_update_customer/{type}', [tests::class, 'sendPostProfileCustomer']);
+
+//POST FOR REGISTRATION OWNER!!!!
+Route::get('test_registration_owner', [tests::class, 'sendPostOwnerRegistration']);
+
+//POST FOR LOGIN OWNER!!!!
+Route::get('test_login_owner', [tests::class, 'sendPostOwnerLogin']);
+
+//POST FOR UPDATE/INSERT BY ADMIN, CUSTOMER!!!!!
+Route::get('test_update_byAdmin_customer/{type?}', [tests::class, 'sendPostProfileUser']);
+/******* TESTING POSTS!!! ********/
+
 
 //Login Customer
-Route::post("login_customer", [LoginCustomer::class, 'LoginCustomer']); 						//interface 1
+Route::post("interface1", [LoginCustomer::class, 'LoginCustomer']); 							//interface 1							#TESTED#
 
 //Search for STORE, all or by full / part name
-Route::get("search/{storeName?}", [SearchStore::class, 'SearchStore']); 						//interface 3
+Route::post("interface3", [SearchStore::class, 'SearchStore']); 								//interface 3							#TESTED#
 
 //See STORE in detail + Save search in History
-Route::get("store/{storeName}", [Store::class, 'SeeStore']); 									//interface 3
-Route::post("store/{storeName}", [Store::class, 'SaveHistory']); 								//interface 4
+//Route::get("store/{storeName}", [Store::class, 'SeeStore']); 									//interface 3							#TESTED#
+Route::post("interface4/{storeName}", [Store::class, 'SaveHistory']); 							//interface 4							#TESTED#
 
 //Display the History of USER
-Route::get("history/{CurrentUser}", [History::class, 'SeeHistory']); 							//interface 5
+Route::post("interface5", [History::class, 'SeeHistory']); 										//interface 5							#TESTED#
 
 //Search for ITEM, all or by full / part name
-Route::get("search_item/{itemName?}", [SearchItem::class, 'SearchItem']); 						//interface 6
+Route::get("search_item/{itemName?}", [SearchItem::class, 'SearchItem']); 						//interface 6							#TESTED#
 
 //Display MAP
-Route::post("map", [Map::class, 'DisplayMap']); 												//interface 7
+Route::post("interface7", [Map::class, 'DisplayMap']); 											//interface 7							
 
 //Save Feedback of STORE
-Route::post("feedback_store", [Feedback::class, 'SaveFeedbackStore']);							//interface 8
+Route::post("feedback_store", [Feedback::class, 'SaveFeedbackStore']);							//interface 8							#TESTED#
 
 //Save Feedback of ITEM
-Route::post("feedback_item", [Feedback::class, 'SaveFeedbackItem']);							//interface 9
+Route::post("feedback_item", [Feedback::class, 'SaveFeedbackItem']);							//interface 9							#TESTED#
 
-Route::post("profile_customer", [ProfileCustomer::class, 'UpdateProfile']);						//interface 10 ****NEED TO BE PUT****
-Route::get("profile_customer/{CurrentUser}", [ProfileCustomer::class, 'SeeProfile']);			//interface 11
+Route::post("profile_customer", [ProfileCustomer::class, 'UpdateProfile']);						//interface 10 ****NEED TO BE PUT****	#TESTED#
+Route::get("profile_customer/{CurrentUser}", [ProfileCustomer::class, 'SeeProfile']);			//interface 11							#TESTED#
 
-Route::post("registration_customer", [RegistrationCustomer::class, 'RegistrationCustomer']); 	//interface 12
+Route::post("registration_customer", [RegistrationCustomer::class, 'RegistrationCustomer']); 	//interface 12							#TESTED#
 
-Route::post("registration_owner", [RegistrationOwner::class, 'RegistrationOwner']); 			//interface 18
+Route::post("interface18", [RegistrationOwner::class, 'RegistrationOwner']); 					//interface 18							#TESTED#
 
-Route::post("login_owner", [LoginOwner::class, 'LoginOwner']); 									//interface 19
+Route::post("interface19", [LoginOwner::class, 'LoginOwner']); 									//interface 19							#TESTED#
 
-Route::get("user_profile/{userName?}", [UserProfile::class, 'SeeUser']);						//interface 20
-Route::post("update_user", [UserProfile::class, 'UpdateUser']);									//interface 21 ****NEED TO BE PUT****
-Route::post("insert_user", [UserProfile::class, 'InsertUser']);									//interface 21
-Route::get("delete_user/{UserId}", [UserProfile::class, 'DeleteUser']);							//interface 22 ****NEED TO BE DELETE****
+Route::get("interface20/{userName?}", [UserProfile::class, 'SeeUser']);							//interface 20							#TESTED#
+Route::post("interface21", [UserProfile::class, 'UpdateOrInsert']);								//interface 21(COMBINE)					#TESTED#
+/*Route::post("interface21", [UserProfile::class, 'UpdateUser']);								//interface 21 ****NEED TO BE PUT****	#NOT USE#
+Route::post("insert_user", [UserProfile::class, 'InsertUser']);	*/								//interface 21							#NOT USE#
+Route::post("interface22", [UserProfile::class, 'DeleteUser']);									//interface 22 ****NEED TO BE DELETE****#TESTED#
 
-Route::get("owner_profile/{ownerName?}", [OwnerProfile::class, 'SeeOwner']);						//interface 23
-Route::post("update_owner", [OwnerProfile::class, 'UpdateOwner']);									//interface 24 ****NEED TO BE PUT****
-Route::post("insert_owner", [OwnerProfile::class, 'InsertOwner']);									//interface 24
-Route::get("delete_owner/{OwnerId}", [OwnerProfile::class, 'DeleteOwner']);							//interface 25 ****NEED TO BE DELETE****
+Route::get("interface23/{ownerName?}", [OwnerProfile::class, 'SeeOwner']);						//interface 23							#TESTED#
+Route::post("interface21", [OwnerProfile::class, 'UpdateOrInsert']);							//interface 24
+/*Route::post("interface24", [OwnerProfile::class, 'UpdateOwner']);								//interface 24 ****NEED TO BE PUT****	#NOT USE#
+Route::post("insert_owner", [OwnerProfile::class, 'InsertOwner']);*/							//interface 24							#NOT USE#
+Route::post("interface25", [OwnerProfile::class, 'DeleteOwner']);								//interface 25 ****NEED TO BE DELETE****
 
 Route::get('/user', function (Request $request) {
     return $request->user();

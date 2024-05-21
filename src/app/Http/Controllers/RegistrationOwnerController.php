@@ -7,30 +7,35 @@ use Illuminate\Support\Facades\DB;
 
 class RegistrationOwnerController extends Controller
 {
+	private $_dbInsert;
+	private $_dbSelect;
+	private $_newArray;
+	
     function RegistrationOwner(Request $array)
 	{
-		$SuccessToken = "";
-		$temporary = DB::select('SELECT username
+		$MatchToken = "";
+		
+		$input = $array->all();
+		
+		$this->_dbSelect = DB::select('SELECT username
 									FROM users
 									WHERE username = ?', 
-									[$array["UserName"]]);
-		if(!$temporary)
+									[$input["UserName"]]);
+		if(!$this->_dbSelect)
 		{
-			$this->_dbInsert = DB::insert('INSERT into users (username, password) 
-								values (?, ?)', 
-								[$array["UserName"], $array["PassWord"]]);
+			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
+								values (?, ?, ?)', 
+								[$input["UserName"], $input["UserPassword"], "owner"]);
 								
 			if($this->_dbInsert == 1)
 			{
-				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+				$MatchToken = true;
+				$this->_newArray = array("MatchToken" => $MatchToken);
 			}
 			else
 			{
-				$SuccessToken = false;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+				$MatchToken = false;
+				$this->_newArray = array("MatchToken" => $MatchToken);
 			}
 		}
 		else

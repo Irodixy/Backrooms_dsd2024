@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
  
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
  
 class QueryBuilderController extends Controller
 {
@@ -38,19 +38,55 @@ class QueryBuilderController extends Controller
 				$newString = $newString . " WHERE u.ID = ? AND u.ID = i.IDUser";
 				return $newString;
 			}
-			else if ($id == 32)
+			else if ($id == 21)
 			{
-				$newString = $type . " users u, store s SET ";
+				unset($array["UserId"]);
+				$newString = $type . " users u, interests i SET ";
 				foreach ($array as $key => $x)
 				{
-					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName")
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests" AND $key != "UserPassword")
 					{
 						$add = strtolower($key);
 						$newString = $newString . "u." . "$add = ?, ";
 					}
+					else if($key == "UserPassword")
+					{
+						$add = str_replace("user", "", strtolower($key));
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if ($key == "Interests")
+					{
+						foreach ($x as $keys => $y)
+						{
+							$add = strtolower($keys);
+							$newString = $newString . "i." . "$add = ?, ";
+						}
+					}
+				}
+				$newString = substr($newString, 0, -2);
+				$newString = $newString . " WHERE u.ID = ? AND u.ID = i.IDUser";
+				return $newString;
+			}
+			else if ($id == 24)
+			{
+				unset($array["StoreId"]);
+				unset($array["UserId"]);
+				$newString = $type . " users u, store s, location l SET ";
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "UserPassword")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if($key == "UserPassword")
+					{
+						$add = str_replace("user", "", strtolower($key));
+						$newString = $newString . "u." . "$add = ?, ";
+					}
 					else if ($key == "StoreName")
 					{
-							$add = strtolower($key);
+							$add = str_replace("store", "", strtolower($key));
 							$newString = $newString . "s." . "$add = ?, ";
 					}
 					else if ($key == "StoreLocation")
@@ -58,12 +94,12 @@ class QueryBuilderController extends Controller
 						foreach ($x as $keys => $y)
 						{
 							$add = strtolower($keys);
-							$newString = $newString . "s." . "$add = ?, ";
+							$newString = $newString . "l." . "$add = ?, ";
 						}
 					}
 				}
 				$newString = substr($newString, 0, -2);
-				$newString = $newString . " WHERE u.ID = ? AND u.ID = i.IDUser";
+				$newString = $newString . " WHERE u.ID = ? AND u.ID = s.IDOwner AND s.ID = ? AND s.ID = l.IDStore";
 				return $newString;
 			}
 		}
@@ -91,6 +127,53 @@ class QueryBuilderController extends Controller
 					}
 				}
 				array_push($newArray, $idUser);
+				return $newArray;
+			}
+			else if($id == 21)
+			{
+				unset($array["UserId"]);
+				$newArray = [];
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests")
+					{
+						array_push($newArray, $x);
+					}
+					else if ($key == "Interests")
+					{
+						foreach ($x as $keys => $y)
+						{
+							array_push($newArray, $y);
+						}
+					}
+				}
+				array_push($newArray, $idUser);
+				return $newArray;
+			}
+			else if($id == 24)
+			{
+				unset($array["UserId"]);
+				$newArray = [];
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "StoreId")
+					{
+						array_push($newArray, $x);
+					}
+					else if ($key == "StoreName")
+					{
+						array_push($newArray, $x);
+					}
+					else if ($key == "StoreLocation")
+					{
+						foreach ($x as $keys => $y)
+						{
+							array_push($newArray, $y);
+						}
+					}
+				}
+				array_push($newArray, $idUser);
+				array_push($newArray, $array["StoreId"]);
 				return $newArray;
 			}
 		}

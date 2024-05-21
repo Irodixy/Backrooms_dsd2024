@@ -14,7 +14,7 @@ class ProfileCustomerController extends Controller
 												FROM users 
 												WHERE username = ? and password = ?', 
 												[$array["UserName"], $array["PassWord"]]);
-
+		print_r($array["UserName"]);
 		if (count($temporary) == 1)
 		{
 			//i.array_keys($array["interests"])[?] = ?, -> dependes of how many interest it is.
