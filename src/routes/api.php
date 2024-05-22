@@ -18,6 +18,8 @@ use App\Http\Controllers\UserProfileController as UserProfile;
 use App\Http\Controllers\OwnerProfileController as OwnerProfile;
 use App\Http\Controllers\RegistrationCustomerController as RegistrationCustomer;
 use App\Http\Controllers\RegistrationOwnerController as RegistrationOwner;
+use App\Http\Controllers\AnalyticsController as Analytics;
+use App\Http\Controllers\ProfileOwnerController as ProfileOwner;
 
 /******* TESTING POSTS!!! ********/
 
@@ -41,6 +43,15 @@ Route::get('test_login_owner', [tests::class, 'sendPostOwnerLogin']);
 
 //POST FOR UPDATE/INSERT BY ADMIN, CUSTOMER!!!!!
 Route::get('test_update_byAdmin_customer/{type?}', [tests::class, 'sendPostProfileUser']);
+
+//POST FOR SHOW ANALYTICS OF STORE TO ADMIN!!!!!
+Route::get('test_analytics', [tests::class, 'sendPostAnalytics']); 
+
+//POST FOR SHOW OWNER PROFILE!!!!!
+Route::get('test_see_owner_profile', [tests::class, 'sendPostSeeProfileOwner']); 
+
+//POST FOR REGISTRATION OF CUSTOMER!!!!!
+Route::get('test_registration_customer', [tests::class, 'sendPostRegistrationCustomer']);
 /******* TESTING POSTS!!! ********/
 
 
@@ -69,10 +80,10 @@ Route::post("feedback_store", [Feedback::class, 'SaveFeedbackStore']);							//i
 //Save Feedback of ITEM
 Route::post("feedback_item", [Feedback::class, 'SaveFeedbackItem']);							//interface 9							#TESTED#
 
-Route::post("profile_customer", [ProfileCustomer::class, 'UpdateProfile']);						//interface 10 ****NEED TO BE PUT****	#TESTED#
-Route::get("profile_customer/{CurrentUser}", [ProfileCustomer::class, 'SeeProfile']);			//interface 11							#TESTED#
+Route::post("profile_customer", [ProfileCustomer::class, 'UpdateProfile']);						//interface 10 ****NEED TO BE PUT****	
+Route::get("profile_customer/{CurrentUser}", [ProfileCustomer::class, 'SeeProfile']);			//interface 11							
 
-Route::post("registration_customer", [RegistrationCustomer::class, 'RegistrationCustomer']); 	//interface 12							#TESTED#
+Route::post("interface12", [RegistrationCustomer::class, 'RegistrationCustomer']); 	//interface 12							#TESTED#
 
 Route::post("interface18", [RegistrationOwner::class, 'RegistrationOwner']); 					//interface 18							#TESTED#
 
@@ -89,6 +100,11 @@ Route::post("interface21", [OwnerProfile::class, 'UpdateOrInsert']);							//int
 /*Route::post("interface24", [OwnerProfile::class, 'UpdateOwner']);								//interface 24 ****NEED TO BE PUT****	#NOT USE#
 Route::post("insert_owner", [OwnerProfile::class, 'InsertOwner']);*/							//interface 24							#NOT USE#
 Route::post("interface25", [OwnerProfile::class, 'DeleteOwner']);								//interface 25 ****NEED TO BE DELETE****
+
+Route::post("interface26", [Analytics::class, 'Analytics']);									//interface 26 ****SHOULD BE GET****	#TESTED#
+
+Route::post("interface27", [ProfileOwner::class, 'SeeProfile']);								//interface 27 ****SHOULD BE GET****	#TESTED#
+Route::post("interface28", [ProfileOwner::class, 'UpdateProfile']);								//interface 28 ****SHOULD BE PUT****	#TESTED#
 
 Route::get('/user', function (Request $request) {
     return $request->user();

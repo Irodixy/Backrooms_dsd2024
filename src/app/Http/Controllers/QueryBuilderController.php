@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
  
 class QueryBuilderController extends Controller
 {
-    /**
-     * Show a list of all of the application's users!
-     */
+	
+	private $_dbSelect;
+    
     public function StringBuilder($type, $id, $array)
     {
 		if ($type == "UPDATE")
@@ -99,7 +99,7 @@ class QueryBuilderController extends Controller
 					}
 				}
 				$newString = substr($newString, 0, -2);
-				$newString = $newString . " WHERE u.ID = ? AND u.ID = s.IDOwner AND s.ID = ? AND s.ID = l.IDStore";
+				$newString = $newString . " WHERE u.ID = ? AND u.ID = s.IDOwner AND (s.ID = ? OR s.name = ?) AND s.ID = l.IDStore";
 				return $newString;
 			}
 		}
@@ -152,7 +152,52 @@ class QueryBuilderController extends Controller
 			}
 			else if($id == 24)
 			{
-				unset($array["UserId"]);
+				$this->_dbSelect = DB::select('SELECT name
+												FROM store
+												WHERE IDOwner = ?',
+												[$idUser]);
+												
+				if ($this->_dbSelect == 1)
+				{
+					foreach($this->_dbSelect as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $StoreName => $input)
+						{
+							unset($array["UserId"]);
+							$newArray = [];
+							foreach ($array as $key => $x)
+							{
+								if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "StoreId")
+								{
+									array_push($newArray, $x);
+								}
+								else if ($key == "StoreName")
+								{
+									array_push($newArray, $x);
+								}
+								else if ($key == "StoreLocation")
+								{
+									foreach ($x as $keys => $y)
+									{
+										array_push($newArray, $y);
+									}
+								}
+							}
+							array_push($newArray, $idUser);
+							array_push($newArray, $array["StoreId"]);
+							array_push($newArray, $input);
+							return $newArray;
+						}
+					}
+				}
+				else
+				{
+					return "ERROR founded, please try again later";
+				}
+				
+				
+				/*unset($array["UserId"]);
 				$newArray = [];
 				foreach ($array as $key => $x)
 				{
@@ -174,7 +219,8 @@ class QueryBuilderController extends Controller
 				}
 				array_push($newArray, $idUser);
 				array_push($newArray, $array["StoreId"]);
-				return $newArray;
+				array_push($newArray, $array["StoreId"]);
+				return $newArray;*/
 			}
 		}
 	}

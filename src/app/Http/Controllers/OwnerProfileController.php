@@ -152,11 +152,11 @@ class OwnerProfileController extends Controller
 	
 	function InsertOwner ($array)
 	{
-		$temporary = DB::select('SELECT username
+		$this->_dbSelect = DB::select('SELECT username
 									FROM users
 									WHERE username = ?', 
 									[$array["UserName"]]);
-		if(!$temporary)
+		if(!$this->_dbSelect)
 		{
 			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
 											values (?, ?, ?)', 
@@ -226,9 +226,11 @@ class OwnerProfileController extends Controller
 	
 	function DeleteOwner (Request $array)
 	{
+		$input = $array->all();
+		
 		$this->_dbDelete = DB::delete('DELETE FROM users
 												WHERE ID = ?',
-												[$array["UserId"]]);
+												[$input["UserId"]]);
 												
 		if($this->_dbDelete == 1)
 			{

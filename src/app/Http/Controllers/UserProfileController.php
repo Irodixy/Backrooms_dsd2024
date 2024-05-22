@@ -38,7 +38,7 @@ class UserProfileController extends Controller
 	
     function SeeUser($userName = "")
 	{
-		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.bday AS Birthday, u.email AS Email
+		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
 										FROM users u
 										WHERE u.username LIKE ?',
 										['%' . $userName . '%']);
@@ -66,17 +66,24 @@ class UserProfileController extends Controller
 										WHERE u.ID = ?
 										AND u.ID = i.IDUser',
 										[$x]);
-										
+					
+					$string = "";
 					foreach($temporary as $Objs)
 					{
 						//Here we separete each result from DB in their diferent keys and values
 						foreach($Objs as $keys => $y)
 						{
-							$Interests[$keys] = $y;
+							if($keys != "IDUser")
+							{
+								$Interests[$keys] = $y;
+							}
 						}
+						//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+						$values = array_values($Interests);
+						$string = implode(',', $values);
 					}
 					
-					$save["Interests"] = $Interests;
+					$save["Interests"] = $string;
 				}
 
 				if($i >= 3)
@@ -104,6 +111,31 @@ class UserProfileController extends Controller
 
 		if (count($temporary) == 1)
 		{
+			//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+			$liteInterests = DB::select('SELECT *
+										FROM interests
+										WHERE ID = ?', 
+										[$array["UserId"]]);
+										
+			foreach($temporary as $Objs)
+				{
+					$values_array = explode(',', $array["Interests"]);
+					$i = 0;
+					$save =[];
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Objs as $key => $x)
+					{
+						if ($key != "IDUser")
+						{
+							$save[$key] = $values_array[$i];
+							$i++;
+						}
+					}
+					$array["Interests"] = [];
+					array_push($array["Interests"], $save);
+				}
+			
+			
 			//Possible UPDATE!!!! ->build IT before going in here!
 			$ID = 21;
 			$query = new QueryBuilderController();
@@ -138,9 +170,9 @@ class UserProfileController extends Controller
 	
 	function InsertUser ($array)
 	{
-			$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password) 
-								values (?, ?, ?)', 
-								[$array["UserId"] , $array["UserName"], $array["UserPassword"]]);
+			$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password, birthday) 
+								values (?, ?, ?, ?)', 
+								[$array["UserId"] , $array["UserName"], $array["UserPassword"], $array["Birthday"]]);
 								
 			if($this->_dbInsert == 1)
 			{
@@ -154,9 +186,9 @@ class UserProfileController extends Controller
 					//Here we separete each result from DB in their diferent keys and values
 					foreach($Objs as $keys => $x)
 					{
-						$interst_insert = DB::insert('INSERT INTO interests (IDUser, interest1, interest2, interest3)
-														VALUES (?, ?, ?, ?)',
-														[$x, $array["Interests"]["interest1"], $array["Interests"]["interest2"], $array["Interests"]["interest3"]]);
+						$interst_insert = DB::insert('INSERT INTO interests (IDUser)
+														VALUES (?)',
+														[$x]);
 														
 						if($interst_insert == 1)
 						{

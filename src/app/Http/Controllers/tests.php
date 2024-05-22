@@ -105,6 +105,16 @@ class tests extends Controller
 		return Http::post('http://192.168.56.102/laravel/api/interface10', $array);	
 	}
 	
+	function sendPostRegistrationCustomer() 
+	{
+		$array = ["InterfaceId"=> 12,
+		"CurrentUser"=> "NULL",
+		"UserName"=> "Paul",
+		"PassWord"=> "dsdsdsddsd"];
+		
+		return Http::post('http://192.168.56.102/laravel/api/interface12', $array);	
+	}
+	
 	function sendPostOwnerRegistration() //TESTED
 	{
 		$array = [
@@ -210,5 +220,18 @@ class tests extends Controller
             "zipcode"=> "1234-567"
         ]];
 		return Http::post('http://192.168.56.102/laravel/api/interface24', $array);	
+	}
+	
+	function sendPostAnalytics ()
+	{
+		$array = [];
+		return Http::post('http://192.168.56.102/laravel/api/interface26', $array);	
+	}
+	
+	function sendPostSeeProfileOwner ()
+	{
+		$array = [
+		"UserName" => "owner2"];
+		return Http::post('http://192.168.56.102/laravel/api/interface27', $array);	
 	}
 }

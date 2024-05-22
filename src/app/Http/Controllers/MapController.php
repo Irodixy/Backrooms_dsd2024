@@ -224,6 +224,9 @@ class MapController extends Controller
 						{
 							$Interests = "ERROR, interests not found";
 						}
+						//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+						$values = array_values($Interests);
+						$string = implode(',', $values);
 
 						$temporary = DB::select('SELECT IDStore AS StoreId, date_time AS VisitTime
 											FROM huntedstore
@@ -254,7 +257,7 @@ class MapController extends Controller
 				}				
 			}
 			
-			$save['Interests'] = $Interests;
+			$save['Interests'] = $string;
 			$save['HuntedStoreIdList'] = $HuntedStoreIdList;
 
 			array_push($UserData, $save);

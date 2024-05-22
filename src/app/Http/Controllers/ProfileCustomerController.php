@@ -56,7 +56,7 @@ class ProfileCustomerController extends Controller
 	
 	function SeeProfile ($CurrentUser)
 	{
-		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.bday AS Birthday
+		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday
 												FROM users u
 												WHERE u.username = ?',
 												[$CurrentUser]);
@@ -94,10 +94,13 @@ class ProfileCustomerController extends Controller
 				$Interests[$key] = $x;
 			}
 		}
+		//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+		$values = array_values($Interests);
+		$string = implode(',', $values);
 		
 		$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $CurrentUser,
 										"UserName" => $save["UserName"], "Birthday" => $save["Birthday"], 
-										"Interests" => $Interests);
+										"Interests" => $string);
 		return $newArray = $this->_newArray;
 					
 	}
