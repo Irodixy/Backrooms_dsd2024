@@ -11,16 +11,18 @@ class RegistrationCustomerController extends Controller
 	private $_dbInsert;
     function RegistrationCustomer(Request $array)
 	{
+		$input = $array->all();
+		
 		$SuccessToken = "";
 		$temporary = DB::select('SELECT username
 									FROM users
 									WHERE username = ?', 
-									[$array["UserName"]]);
+									[$input["UserName"]]);
 		if(!$temporary)
 		{
 			$this->_dbInsert = DB::insert('INSERT into users (username, password) 
 								values (?, ?)', 
-								[$array["UserName"], $array["PassWord"]]);
+								[$input["UserName"], $input$input["PassWord"]]);
 								
 			if($this->_dbInsert == 1)
 			{

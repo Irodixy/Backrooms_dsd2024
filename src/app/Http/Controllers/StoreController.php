@@ -55,10 +55,10 @@ class StoreController extends Controller
 							}
 							else
 							{
-								$location = "ERROR, location not found";
+								$location = array("ERROR" => "location not found");
 							}
 
-							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
 												FROM item i, store s
 												WHERE s.ID = ?
 												AND i.IDStore = s.ID', 
@@ -78,7 +78,7 @@ class StoreController extends Controller
 							}
 							else
 							{
-								$items = array("ERROR, item not found");
+								$items = array("ERROR" => "item not found");
 							}
 						}
 						else if($key === "storeName")

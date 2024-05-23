@@ -40,7 +40,7 @@ class RegistrationOwnerController extends Controller
 		}
 		else
 		{
-			$this->_newArray = "ERROR, username already exists";
+			$this->_newArray = json_decode('{"ERROR": "username already exists"}');
 		}
 		return $newArray = $this->_newArray;
 	}

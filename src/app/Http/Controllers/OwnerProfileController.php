@@ -36,17 +36,25 @@ class OwnerProfileController extends Controller
 		
 	}
 	
-    function SeeOwner($ownerName = "")
+    function SeeOwner(Request $array)
 	{
+		$input = $array->all();
+		
+		if(!isset($input["OwnerName"]))
+		{
+			$input["OwnerName"] = "";
+		}
+		
 		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, s.ID, s.name AS StoreName
 									FROM users u, store s
 									WHERE s.IDOwner = u.ID
 									AND u.username LIKE ?',
-									['%' . $ownerName . '%']);
+									['%' . $input["OwnerName"] . '%']);
 
 		$StoreData = [];
 		$save = [];
-		$StoreLocation = [];
+		$StoreLocation = "";
+		$StoreFloor = "";
 		$AvgRate = [];			
 		foreach($this->_dbSelect as $Obj)
 		{
@@ -59,19 +67,38 @@ class OwnerProfileController extends Controller
 					$save[$key] = $x;
 				}
 				else 
-				{
-					$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+				{					
+					$temporary = DB::select('SELECT l.latitude, l.longitude, l.floor
 										FROM store s, location l
 										WHERE s.ID = l.IDStore
 										AND s.ID = ?', 
 										[$x]);
+										
+										/* $temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+										FROM store s, location l
+										WHERE s.ID = l.IDStore
+										AND s.ID = ?', 
+										[$x]); */ //ALL INFO IN TABLE LOCATION, IF EVERY NECESSARY TO SEND, USE THIS CODE!!!!
 										
 					foreach($temporary as $Objs)
 					{
 						//Here we separete each result from DB in their diferent keys and values
 						foreach($Objs as $keys => $y)
 						{
-							$StoreLocation[$keys] = $y;
+							//ADAPTATION TO USE IN CODE OF OTHER GROUPS!!!
+							if($keys == "latitude")
+							{
+								$StoreLocation = $y;
+							}
+							else if($keys == "longitude")
+							{
+								$StoreLocation = $StoreLocation . "," . $y;
+							}
+							else
+							{
+								$StoreFloor = $y;
+							}
+							//$StoreLocation[$keys] = $y;
 						}
 					}
 					
@@ -91,6 +118,7 @@ class OwnerProfileController extends Controller
 					}
 					
 					$save["StoreLocation"] = $StoreLocation;
+					$save["StoreFloor"] = $StoreFloor;
 					$save["AvgRate"] = $AvgRate;
 				}
 
@@ -145,83 +173,120 @@ class OwnerProfileController extends Controller
 		}
 		else
 		{
-			$newArray = "ERROR, User not Found!";
+			$newArray = json_decode('{"ERROR": "User not Found!"}');
 		}
 		return $newArray;
 	}
 	
 	function InsertOwner ($array)
 	{
-		$this->_dbSelect = DB::select('SELECT username
-									FROM users
-									WHERE username = ?', 
-									[$array["UserName"]]);
+		$SuccessToken = "";
+		
+		$this->_dbSelect = DB::select('SELECT ID
+										FROM users
+										WHERE username = ?', 
+										[$array["UserName"]]);
+																	
 		if(!$this->_dbSelect)
 		{
 			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
 											values (?, ?, ?)', 
-											[$array["username"], $array["password"], "owner"]);
+											[$array["UserName"], $array["UserPassword"], "owner"]);
 											
 			if($this->_dbInsert == 1)
 			{
-				$OwnerAccount = true;
-			}
-			else
-			{
-				$OwnerAccount = false;
-			}
-			
-			$this->_dbInsert = DB::insert('INSERT into store
-											(name, type) 
-											VALUES (?, ?, ?, ?)', 
-											[$array["storeName"], $array["storeType"]]);
-											
-			if($this->_dbInsert == 1)
-			{
-				$Store = true;
-			}
-			else
-			{
-				$Store = false;
-			}
-			
-			$check = DB::select('"SELECT ID 
-								FROM store 
-								WHERE name = ?', 
-								[$array["storeName"]]);
-								
-			if($check == 1)
-			{
-				$this->_dbInsert = DB::insert('INSERT into location 
-											(IDStore, latitude, longitude, country, state, city, street, number, floor, zipcode) 
-											VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
-											[$check, $array["StoreLocation"]["latitude"], $array["StoreLocation"]["longitude"], $array["StoreLocation"]["country"],
-											$array["StoreLocation"]["state"], $array["StoreLocation"]["city"], $array["StoreLocation"]["street"], 
-											$array["StoreLocation"]["number"], $array["StoreLocation"]["floor"], $array["StoreLocation"]["zipcode"]]);
-											
-				if($this->_dbInsert == 1)
+				$check = DB::select('"SELECT ID 
+									FROM users 
+									WHERE username = ?', 
+									[$array["UserName"]]);
+				if(count($check) == 1)
 				{
-					$StoreLocation = true;
+					$UserId = "";
+					foreach($check as $Objs)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Objs as $keys => $x)
+						{
+							$UserId = $x;
+						}
+					}
+					
+					$anotherTemporay = DB::insert('INSERT INTO store
+											(name, IDOwner) 
+											VALUES (?, ?)', 
+											[$array["StoreName"], $UserId]);
+											
+					if($anotherTemporay == 1)
+					{
+						$anotherCheck = DB::select('"SELECT ID 
+											FROM store
+											WHERE IDOwner = ?
+											AND name = ?', 
+											[$UserId, $$array["StoreName"]]);
+											
+						if(count($anotherCheck) == 1)
+						{
+							$StoreId = "";
+							foreach($check as $Objs)
+							{
+								//Here we separete each result from DB in their diferent keys and values
+								foreach($Objs as $keys => $x)
+								{
+									$StoreId = $x;
+								}
+							}
+							
+							//$values_array[0] is latitude and $values_array[1] is longitude!!!!!
+							$values_array = explode(',', $array["StoreLocation"]);
+							
+							
+							/* $location = DB::insert('INSERT into location 
+													(IDStore, latitude, longitude, country, state, city, street, number, floor, zipcode) 
+													VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+													[$check, $array["StoreLocation"]["latitude"], $array["StoreLocation"]["longitude"], $array["StoreLocation"]["country"],
+													$array["StoreLocation"]["state"], $array["StoreLocation"]["city"], $array["StoreLocation"]["street"], 
+													$array["StoreLocation"]["number"], $array["StoreLocation"]["floor"], $array["StoreLocation"]["zipcode"]]); */
+													//THIS IS FULL INSERT OF LOCATION, BUT FOR NOW IS NOT IN USE
+													
+							$location = DB::insert('INSERT into location 
+													(IDStore, latitude, longitude, floor) 
+													VALUES (?, ?, ?, ?)', 
+													[$StoreId, $$values_array [0], $$values_array [1], $array["StoreFloor"]]);
+											
+							if($location == 1)
+							{
+								$this->_newArray = array("SuccessToken" => true);
+							}
+							else
+							{
+								$this->_newArray = json_decode('{"ERROR": "Store location could not be inserted, please try again later"}');
+							}
+						}
+						else
+						{
+							$this->_newArray = json_decode('{"ERROR": "Store should had been inserted, but returns null"}');
+						}
+					}
+					else
+					{
+						$this->_newArray = json_decode('{"ERROR": "Store could not be inserted, please try again later"}');
+					}
 				}
 				else
 				{
-					$StoreLocation = false;
-				}							
+					$this->_newArray = json_decode('{"ERROR": "Owner account should had been inserted, but returns null"}');
+				}
 			}
 			else
 			{
-				$Store = false;
-				$StoreLocation = false;
-			}
-			
-			$this->_newArray = array("OwnerAccount" => $OwnerAccount, "StoreLocation" => $StoreLocation, 
-									"Store" => $Store);
-			return $newArray = $this->_newArray;
+				$this->_newArray = json_decode('{"ERROR": "Owner account could not be inserted, please try again later"}');
+			}	
 		}
 		else
 		{
-			return "ERROR";
+			$this->_newArray = json_decode('{"ERROR": "Owner account already exist"}');
 		}
+		return $newArray = $this->_newArray;
 	}
 	
 	function DeleteOwner (Request $array)

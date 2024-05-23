@@ -9,6 +9,8 @@ class FeedbackController extends Controller
 {
     function SaveFeedbackStore (Request $array)
 	{
+		$input = $array->all();
+		
 		$SuccessToken = "";
 		$save = [];
 			
@@ -16,7 +18,7 @@ class FeedbackController extends Controller
 		$temporary = DB::select('SELECT ID AS userId
 							FROM users 
 							WHERE username = ?', 
-							[$array["CurrentUser"]]);
+							[$input["CurrentUser"]]);
 		
 		foreach($temporary as $Obj)
 		{
@@ -29,7 +31,7 @@ class FeedbackController extends Controller
 
 		$this->_dbInsert = DB::insert('insert into feedback (IDUser, IDStore, comment, rating) 
 					values (?, ?, ?, ?)', 
-					[$save["userId"], $array["Feedback"]["StoreId"], $array["Feedback"]["comment"], $array["Feedback"]["rating"]]);
+					[$save["userId"], $input["Feedback"]["StoreId"], $input["Feedback"]["comment"], $input["Feedback"]["rating"]]);
 					
 		if($this->_dbInsert == 1)
 		{
@@ -38,19 +40,19 @@ class FeedbackController extends Controller
 			
 			if ($sendFeedbackStore == false)
 			{
-				$this->_newArray = "Error, algorithm didn't receive the data";
+				$this->_newArray = array("Error" => "algorithm didn't receive the data");
 			}
 			else
 			{
 				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+				$this->_newArray = array("InterfaceId" => $$input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
 								"SuccessToken" => $SuccessToken);
 			}
 		}
 		else
 		{
 			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
 								"SuccessToken" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;
@@ -58,6 +60,8 @@ class FeedbackController extends Controller
 	
 	function SaveFeedbackItem (Request $array)
 	{
+		$input = $array->all();
+		
 		$SuccessToken = "";
 		$save = [];
 			
@@ -65,7 +69,7 @@ class FeedbackController extends Controller
 		$temporary = DB::select('SELECT ID AS userId
 							FROM users 
 							WHERE username = ?', 
-							[$array["CurrentUser"]]);
+							[$input["CurrentUser"]]);
 		
 		foreach($temporary as $Obj)
 		{
@@ -78,18 +82,18 @@ class FeedbackController extends Controller
 	
 		$this->_dbInsert = DB::insert('INSERT into feedback (IDUser, IDItem, comment, rating) 
 					values (?, ?, ?, ?)', 
-					[$save["userId"], $array["Feedback"]["ItemId"], $array["Feedback"]["comment"], $array["Feedback"]["rating"]]);
+					[$save["userId"], $input["Feedback"]["ItemId"], $input["Feedback"]["comment"], $input["Feedback"]["rating"]]);
 					
 		if($this->_dbInsert == 1)
 		{
 			$SuccessToken = true;
-			$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
 								"SuccessToken" => $SuccessToken);
 		}
 		else
 		{
 			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
+			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
 								"SuccessToken" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;

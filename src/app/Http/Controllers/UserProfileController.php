@@ -31,22 +31,29 @@ class UserProfileController extends Controller
 		}
 		else
 		{
-			return "Something went wrong, please try again later";
+			return json_decode('{"ERROR": "Something went wrong, please try again later"}');
 		}
 		
 	}
 	
-    function SeeUser($userName = "")
+    function SeeUser(Request $array)
 	{
+		$input = $array->all();
+		
+		if(!isset($input["UserSearched"]))
+		{
+			$array["UserSearched"] = "";
+		}
+		
 		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
 										FROM users u
 										WHERE u.username LIKE ?',
-										['%' . $userName . '%']);
+										['%' . $input["UserSearched"] . '%']);
 				
 		$UserData = [];
 		$save = [];
 		$Interests = [];	
-			print_r($userName);
+
 		foreach($this->_dbSelect as $Obj)
 		{
 			$i = 0;
@@ -135,8 +142,6 @@ class UserProfileController extends Controller
 					array_push($array["Interests"], $save);
 				}
 			
-			
-			//Possible UPDATE!!!! ->build IT before going in here!
 			$ID = 21;
 			$query = new QueryBuilderController();
 			$string = $query -> StringBuilder("UPDATE", $ID, $array);
@@ -163,51 +168,51 @@ class UserProfileController extends Controller
 		}
 		else
 		{
-			$this->_newArray = "ERROR, User not Found!";
+			$this->_newArray = json_decode('{"ERROR": "User not Found!"}');
 		}
 		return $newArray = $this->_newArray;	
 	}
 	
 	function InsertUser ($array)
 	{
-			$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password, birthday) 
-								values (?, ?, ?, ?)', 
-								[$array["UserId"] , $array["UserName"], $array["UserPassword"], $array["Birthday"]]);
-								
-			if($this->_dbInsert == 1)
+		$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password, birthday) 
+							values (?, ?, ?, ?)', 
+							[$array["UserId"] , $array["UserName"], $array["UserPassword"], $array["Birthday"]]);
+							
+		if($this->_dbInsert == 1)
+		{
+			$temporary = DB::select('SELECT ID
+									FROM users 
+									WHERE username = ?', 
+									[$array["UserName"]]);
+									
+			foreach($temporary as $Objs)
 			{
-				$temporary = DB::select('SELECT ID
-										FROM users 
-										WHERE username = ?', 
-										[$array["UserName"]]);
-										
-				foreach($temporary as $Objs)
+				//Here we separete each result from DB in their diferent keys and values
+				foreach($Objs as $keys => $x)
 				{
-					//Here we separete each result from DB in their diferent keys and values
-					foreach($Objs as $keys => $x)
+					$interst_insert = DB::insert('INSERT INTO interests (IDUser)
+													VALUES (?)',
+													[$x]);
+													
+					if($interst_insert == 1)
 					{
-						$interst_insert = DB::insert('INSERT INTO interests (IDUser)
-														VALUES (?)',
-														[$x]);
-														
-						if($interst_insert == 1)
-						{
-							$SuccessToken = true;
-							$this->_newArray = array("SuccessToken" => $SuccessToken);
-						}
-						else
-						{
-							$SuccessToken = false;
-							$this->_newArray = array("SuccessToken" => $SuccessToken);
-						}
+						$SuccessToken = true;
+						$this->_newArray = array("SuccessToken" => $SuccessToken);
+					}
+					else
+					{
+						$SuccessToken = false;
+						$this->_newArray = array("SuccessToken" => $SuccessToken);
 					}
 				}
 			}
-			else
-			{
-				$SuccessToken = false;
-				$this->_newArray = array("SuccessToken" => $SuccessToken);
-			}
+		}
+		else
+		{
+			$SuccessToken = false;
+			$this->_newArray = array("SuccessToken" => $SuccessToken);
+		}
 
 		return $newArray = $this->_newArray;
 	}

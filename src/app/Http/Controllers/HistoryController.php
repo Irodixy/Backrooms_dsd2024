@@ -35,7 +35,7 @@ class HistoryController extends Controller
 		}
 		else
 		{
-			$temporary = array("ERROR, no History to show");
+			$temporary = array("ERROR" => "No History to show");
 		}
 					
 		$this->_newArray = array("InterfaceId" => 5, "CurrentUser" => $input["CurrentUser"], "HuntedStoreIdList" => $temporary);

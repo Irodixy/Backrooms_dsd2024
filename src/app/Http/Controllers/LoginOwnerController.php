@@ -12,12 +12,14 @@ class LoginOwnerController extends Controller
 	
      function LoginOwner(Request $array)
 	{
+		$input = $array->all();
+		
 		$MatchToken = "";
 		
 		$this->_dbSelect = DB::select('SELECT ID, username 
 												FROM users 
 												WHERE username = ? and password = ?', 
-												[$array["UserName"], $array["UserPassword"]]);
+												[$input["UserName"], $input["UserPassword"]]);
 				
 		if(count($this->_dbSelect) == 1)
 		{

@@ -102,6 +102,59 @@ class QueryBuilderController extends Controller
 				$newString = $newString . " WHERE u.ID = ? AND u.ID = s.IDOwner AND (s.ID = ? OR s.name = ?) AND s.ID = l.IDStore";
 				return $newString;
 			}
+			else if ($id == 28)
+			{
+				unset($array["StoreId"]);
+				unset($array["UserId"]);
+				$newString = $type . " users u, store s, location l SET ";
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "UserPassword")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if($key == "UserPassword")
+					{
+						$add = str_replace("user", "", strtolower($key));
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if ($key == "StoreName")
+					{
+							$add = str_replace("store", "", strtolower($key));
+							$newString = $newString . "s." . "$add = ?, ";
+					}
+					else if ($key == "StoreLocation")
+					{
+						foreach ($x as $keys => $y)
+						{
+							$add = strtolower($keys);
+							$newString = $newString . "l." . "$add = ?, ";
+						}
+					}
+				}
+				$newString = substr($newString, 0, -2);
+				$newString = $newString . " WHERE u.ID = ? AND u.ID = s.IDOwner AND (s.ID = ? OR s.name = ?) AND s.ID = l.IDStore";
+				return $newString;
+			}
+			else if ($id == 30)
+			{
+				unset($array["ItemId"]);
+				unset($array["UserName"]);
+				
+				$newString = $type . " item i, users u, store s SET ";
+				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser")
+					{
+						$add = str_replace("item", "", strtolower($key));
+						$newString = $newString . "i." . "$add = ?, ";
+					}
+				}
+				$newString = substr($newString, 0, -2);
+				$newString = $newString . " WHERE u.username = ? AND u.ID = s.IDOwner AND s.ID = i.IDStore AND i.ID = ?";
+				return $newString;
+			}
 		}
     }
 	
@@ -184,43 +237,97 @@ class QueryBuilderController extends Controller
 									}
 								}
 							}
+							
+							if(!isset($array["StoreId"]))
+							{
+								$array["StoreId"] = "0";
+							}
+							
 							array_push($newArray, $idUser);
-							array_push($newArray, $array["StoreId"]);
-							array_push($newArray, $input);
+							array_push($newArray, $array["StoreId"]); //THIS ONE IS THE OPTIMAL OPTION (owner can have more then one store)
+							array_push($newArray, $input); //THIS ONE IS ONLY TO ADAPT TO THE CODE OT OTHER GROUPS (in case owner can only have one store)
 							return $newArray;
 						}
 					}
 				}
 				else
 				{
-					return "ERROR founded, please try again later";
+					return $newArray = [];
 				}
-				
-				
-				/*unset($array["UserId"]);
-				$newArray = [];
-				foreach ($array as $key => $x)
+			}
+			else if($id == 28)
+			{
+				$this->_dbSelect = DB::select('SELECT name
+												FROM store
+												WHERE IDOwner = ?',
+												[$idUser]);
+												
+				if (count($this->_dbSelect) == 1)
 				{
-					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "StoreId")
+					foreach($this->_dbSelect as $Obj)
 					{
-						array_push($newArray, $x);
-					}
-					else if ($key == "StoreName")
-					{
-						array_push($newArray, $x);
-					}
-					else if ($key == "StoreLocation")
-					{
-						foreach ($x as $keys => $y)
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $StoreName => $input)
 						{
-							array_push($newArray, $y);
+							$newArray = [];
+							foreach ($array as $key => $x)
+							{
+								if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "StoreLocation" AND $key != "StoreName" AND $key != "StoreId")
+								{
+									array_push($newArray, $x);
+								}
+								else if ($key == "StoreName")
+								{
+									array_push($newArray, $x);
+								}
+								else if ($key == "StoreLocation")
+								{
+									foreach ($x as $keys => $y)
+									{
+										array_push($newArray, $y);
+									}
+								}
+							}
+							
+							if(!isset($array["StoreId"]))
+							{
+								$array["StoreId"] = "0";
+							}
+							
+							array_push($newArray, $idUser);
+							array_push($newArray, $array["StoreId"]); //THIS ONE IS THE OPTIMAL OPTION (owner can have more then one store)
+							array_push($newArray, $input); //THIS ONE IS ONLY TO ADAPT TO THE CODE OT OTHER GROUPS (in case owner can only have one store)
+							return $newArray;
 						}
 					}
 				}
-				array_push($newArray, $idUser);
-				array_push($newArray, $array["StoreId"]);
-				array_push($newArray, $array["StoreId"]);
-				return $newArray;*/
+				else
+				{
+					return $newArray = []; //NEED TO FIND OTHER OPTION!!!! OR MAKE A TRY ON UPDATE!!!!
+				}
+			}
+			else if ($id == 30)
+			{
+				unset($array["ItemId"]);
+				$this->_dbSelect = DB::select('SELECT name
+												FROM item
+												WHERE ID = ?',
+												[$idUser]);
+												
+				if (count($this->_dbSelect) == 1)
+				{
+					$newArray = [];
+					foreach ($array as $key => $x)
+					{
+						if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "UserName")
+						{
+							array_push($newArray, $x);
+						}
+					}
+					array_push($newArray, $array["UserName"]);
+					array_push($newArray, $idUser);
+					return $newArray;
+				}
 			}
 		}
 	}

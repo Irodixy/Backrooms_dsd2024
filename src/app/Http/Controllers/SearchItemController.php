@@ -17,24 +17,24 @@ class SearchItemController extends Controller
 												WHERE i.name LIKE ?', 
 												['%' . $itemName . '%']);
 												
-				if(count($this->_dbSelect) > 0)
-				{						
-					foreach($this->_dbSelect as $Obj)
-					{
-						$oneItem = [];
-						foreach($Obj as $key => $x)
-						{
-							$oneItem[$key] = $x;
-						}
-						array_push($temporary, $oneItem);
-					}
-				}
-				else
+		if(count($this->_dbSelect) > 0)
+		{						
+			foreach($this->_dbSelect as $Obj)
+			{
+				$oneItem = [];
+				foreach($Obj as $key => $x)
 				{
-					$temporary = array("ERROR, no item found");
+					$oneItem[$key] = $x;
 				}
-				
-				$this->_newArray = array("InterfaceId" => 6, "ItemList" => $temporary);
-				return $newArray = $this->_newArray;
+				array_push($temporary, $oneItem);
+			}
+		}
+		else
+		{
+			$temporary = array("ERROR" => "No item found!");
+		}
+		
+		$this->_newArray = array("InterfaceId" => 6, "ItemList" => $temporary);
+		return $newArray = $this->_newArray;
 	}
 }
