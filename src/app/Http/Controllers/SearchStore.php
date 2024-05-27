@@ -13,6 +13,7 @@ class SearchStore extends Controller
     function SearchStore(Request $array)
 	{
 		$input = $array->all();
+		
 		$MatchToken = "";
 		$temporary = [];
 		
@@ -20,7 +21,7 @@ class SearchStore extends Controller
 				$this->_dbSelect = DB::select('SELECT s.ID AS storeId, s.name AS storeName, s.type, s.description AS StoreDescription 
 												FROM store s
 												WHERE s.name LIKE ?', 
-												['%' . $input["storeName"] . '%']);
+												['%' . $input["StoreName"] . '%']);
 				
 				//Variables to save data and help reorganize the future JSON file			
 				$StoreList = [];

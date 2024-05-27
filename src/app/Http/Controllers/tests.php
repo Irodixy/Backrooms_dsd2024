@@ -25,21 +25,21 @@ class tests extends Controller
 			case 0:
 				$array = ["InterfaceId"=> 3,
 				"CurrentUser"=> "Paul",
-				"storeName"=> ""];
+				"StoreName"=> ""];
 			break;
 			
 			//SEARCH PART NAME (TESTED)
 			case 1:
 				$array = ["InterfaceId"=> 3,
 				"CurrentUser"=> "Paul",
-				"storeName"=> "on"];
+				"StoreName"=> "on"];
 			break;
 			
 			//SEARCH FULL NAME (TESTED)
 			case 2:
 				$array = ["InterfaceId"=> 3,
 				"CurrentUser"=> "Paul",
-				"storeName"=> "Continente"];
+				"StoreName"=> "Continente"];
 			break;
 		}
 		
