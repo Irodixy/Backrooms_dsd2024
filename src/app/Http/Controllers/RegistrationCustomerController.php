@@ -22,7 +22,7 @@ class RegistrationCustomerController extends Controller
 		{
 			$this->_dbInsert = DB::insert('INSERT into users (username, password) 
 								values (?, ?)', 
-								[$input["UserName"], $input$input["PassWord"]]);
+								[$input["UserName"], $input["PassWord"]]);
 								
 			if($this->_dbInsert == 1)
 			{

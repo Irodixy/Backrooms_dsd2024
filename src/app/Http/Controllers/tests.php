@@ -109,7 +109,7 @@ class tests extends Controller
 	{
 		$array = ["InterfaceId"=> 12,
 		"CurrentUser"=> "NULL",
-		"UserName"=> "Paul",
+		"UserName"=> "Paulina",
 		"PassWord"=> "dsdsdsddsd"];
 		
 		return Http::post('http://192.168.56.102/laravel/api/interface12', $array);	
@@ -118,8 +118,8 @@ class tests extends Controller
 	function sendPostOwnerRegistration() //TESTED
 	{
 		$array = [
-		"UserName"=> "Higgs",
-		"UserPassword"=> "hehehehe"];
+		"UserName"=> "MIGUEEEELLLLL",
+		"UserPassword"=> "HIHIHIHIHI"];
 		
 		return Http::post('http://192.168.56.102/laravel/api/interface18', $array);	
 	}
