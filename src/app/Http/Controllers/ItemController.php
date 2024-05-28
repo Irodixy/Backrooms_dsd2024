@@ -41,9 +41,9 @@ class ItemController extends Controller
 		
 		//THIS ONE IS THE ADAPTATION FOR THE CODE WITH OTHER GROUPS
 		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage
-										FROM item i, store s
-										WHERE i.IDStore = s.ID,
-										AND s.IDOwner = u.ID,
+										FROM item i, store s, users u
+										WHERE i.IDStore = s.ID
+										AND s.IDOwner = u.ID
 										AND u.username = ?', 
 										[$input["UserName"]]);
 										
@@ -55,7 +55,7 @@ class ItemController extends Controller
 		
 		$ItemData = [];
 		
-		if(count($this->_dbSelect >= 1))
+		if(count($this->_dbSelect) >= 1)
 		{
 			//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
 			foreach($this->_dbSelect as $Obj)
@@ -79,7 +79,7 @@ class ItemController extends Controller
 		}
 		else
 		{
-			$this->_newArray = json_decode('{"ERROR": "username already exists"}');
+			$this->_newArray = json_decode('{"ERROR": "items not found"}');
 		}
 		
 		return $newArray = $this->_newArray;									

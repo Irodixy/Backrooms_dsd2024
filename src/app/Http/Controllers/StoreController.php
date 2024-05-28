@@ -103,8 +103,7 @@ class StoreController extends Controller
 	{
 		$input = $array->all();
 		$SuccessToken = "";
-		$save = [];
-			
+		$save = [];	
 		//do a try (still not done)
 		$temporary = DB::select('SELECT ID AS userId
 							FROM users 
@@ -120,17 +119,22 @@ class StoreController extends Controller
 			}
 		}
 		
-		$this->_dbInsert = DB::insert('INSERT INTO huntedstore (IDUser, IDStore) values(?, ?)', 
-										[$save["userId"], $input["HuntedStoreIdList"]["StoreId"]);
+		foreach ($input["HuntedStoreIdList"] as $search)
+		{
+			$this->_dbInsert = DB::insert('INSERT INTO huntedstore (IDUser, IDStore, date_time) values(?, ?, ?)', 
+										[$save["userId"], $search["StoreId"], $search["VisitTime"]]);
+		}
+		
+										
 		if($this->_dbInsert == 1)
 		{
 			$SuccessToken = true;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);
+			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
 		}
 		else
 		{
 			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);
+			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;
 	}

@@ -7,15 +7,17 @@ use Illuminate\Support\Facades\DB;
 
 class SearchItemController extends Controller
 {
-    function SearchItem ($itemName ="")
+    function SearchItem (Request $array)
 	{
+		$input = $array->all();
+		
 		$temporary = [];
 		
 		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, 
-												i.imgName AS ItemImage, i.IDStore AS ItemStoreId
+												i.image AS ItemImage, i.IDStore AS ItemStoreId
 												FROM item i
 												WHERE i.name LIKE ?', 
-												['%' . $itemName . '%']);
+												['%' . $input["ItemName"] . '%']);
 												
 		if(count($this->_dbSelect) > 0)
 		{						
@@ -24,7 +26,14 @@ class SearchItemController extends Controller
 				$oneItem = [];
 				foreach($Obj as $key => $x)
 				{
-					$oneItem[$key] = $x;
+					if($key == "ItemImage")
+					{
+						$oneItem[$key] = base64_encode($x);
+					}
+					else
+					{
+						$oneItem[$key] = $x;
+					}
 				}
 				array_push($temporary, $oneItem);
 			}
@@ -34,7 +43,7 @@ class SearchItemController extends Controller
 			$temporary = array("ERROR" => "No item found!");
 		}
 		
-		$this->_newArray = array("InterfaceId" => 6, "ItemList" => $temporary);
+		$this->_newArray = array("InterfaceId" => 6, "CurrentUser" => $input["CurrentUser"], "ItemList" => $temporary);
 		return $newArray = $this->_newArray;
 	}
 }

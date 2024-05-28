@@ -34,13 +34,13 @@ class RegistrationOwnerController extends Controller
 			}
 			else
 			{
-				$MatchToken = false;
-				$this->_newArray = array("MatchToken" => $MatchToken);
+				$this->_newArray = json_decode('{"ERROR": "Something didn\'t work, Registration was not complet successfuly!"}');
 			}
 		}
 		else
 		{
-			$this->_newArray = json_decode('{"ERROR": "username already exists"}');
+			$MatchToken = false;
+			$this->_newArray = array("MatchToken" => $MatchToken);
 		}
 		return $newArray = $this->_newArray;
 	}

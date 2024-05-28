@@ -28,13 +28,13 @@ class RegistrationCustomerController extends Controller
 			{
 				$SuccessToken = true;
 				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+									"successful_token" => $SuccessToken);
 			}
 			else
 			{
 				$SuccessToken = false;
 				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+									"successful_token" => $SuccessToken);
 			}
 		}
 		else

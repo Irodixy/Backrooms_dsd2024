@@ -57,8 +57,23 @@ Route::get('test_registration_customer', [tests::class, 'sendPostRegistrationCus
 //POST FOR REGISTRATION OF CUSTOMER!!!!!
 Route::get('test_owner_update_storeinfo', [tests::class, 'sendPostUpdateProfileOwner']); 
 
+//POST FOR SEE ITEM BY OWNER!!!!!
+Route::get('test_owner_update_item', [tests::class, 'sendPostUpdateItems']); 
+
 //POST FOR UPDATE ITEM BY OWNER!!!!!
-Route::get('test_owner_update_item', [tests::class, 'sendPostUpdateItems']);
+Route::get('test_owner_see_item', [tests::class, 'sendPostSeeItems']); 
+
+//POST FOR SAVE SEARCH HISTORY OF CUSTOMER!!!!
+Route::get('test_save_customer_history', [tests::class, 'sendPostSaveHistory']); 
+
+//POST FOR SEARCH ITEM BY CUSTOMER!!!!!
+Route::get('test_customer_search_item', [tests::class, 'sendPostSearchItem']); 
+
+//POST FOR FEEDBACK2STORE BY CUSTOMER!!!!!
+Route::get('test_customer_feedback_store', [tests::class, 'sendPostFeedbackStore']); 
+
+//POST FOR FEEDBACK2ITEM BY CUSTOMER!!!!!
+Route::get('test_customer_feedback_item', [tests::class, 'sendPostFeedbackItem']); 
 /******* TESTING POSTS!!! ********/
 
 
@@ -76,7 +91,7 @@ Route::post("interface4", [Store::class, 'SaveHistory']); 										//interface 
 Route::post("interface5", [History::class, 'SeeHistory']); 										//interface 5							#TESTED#
 
 //Search for ITEM, all or by full / part name
-Route::get("interface6/{itemName?}", [SearchItem::class, 'SearchItem']); 						//interface 6							
+Route::post("interface6", [SearchItem::class, 'SearchItem']); 									//interface 6							
 
 //Display MAP
 Route::post("interface7", [Map::class, 'DisplayMap']); 											//interface 7							

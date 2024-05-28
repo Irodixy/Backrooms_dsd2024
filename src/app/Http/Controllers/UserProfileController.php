@@ -40,9 +40,9 @@ class UserProfileController extends Controller
 	{
 		$input = $array->all();
 		
-		if(!isset($input["UserSearched"]))
+		if(!array_key_exists("UserSearched", $input))
 		{
-			$array["UserSearched"] = "";
+			$input["UserSearched"] = "";
 		}
 		
 		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday, u.email AS Email

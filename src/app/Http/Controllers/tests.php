@@ -46,12 +46,48 @@ class tests extends Controller
 		return Http::post('http://192.168.56.102/laravel/api/interface3', $array);
 	}
 	
+	function sendPostSaveHistory ()
+	{
+		/*$array = ["InterfaceId"=> 4,
+				"CurrentUser"=> "Maria de Jesus",
+				"HuntedStoreIdList" => 
+				[
+				"StoreId" => 3,
+				"VisitTime"=> 345
+				]];*/
+				
+		$array = json_decode('{
+		"InterfaceId": 4,
+		"CurrentUser": "Maria de Jesus",
+		"HuntedStoreIdList":
+		[
+			{
+			"StoreId" : 3,
+			"VisitTime": "2024-05-28 14:52:48"
+			}
+		]
+	}');
+	
+		return Http::post('http://192.168.56.102/laravel/api/interface4', $array);
+	}
+	
 	function sendPostHistory ()
 	{
-		$array = ["InterfaceId"=> 1,
+		$array = ["InterfaceId"=> 5,
 		"CurrentUser"=> "Paul"];
 	
 		return Http::post('http://192.168.56.102/laravel/api/interface5', $array);
+	}
+	
+	function sendPostSearchItem ()
+	{
+		$array = json_decode('{
+		"InterfaceId": 6,
+		"CurrentUser": "Maria de Jesus",
+		 "ItemName": ""
+		}');
+	
+		return Http::post('http://192.168.56.102/laravel/api/interface6', $array);
 	}
 	
 	function sendPostMap ()
@@ -67,9 +103,43 @@ class tests extends Controller
 		,
 		"maxDistance"=> 4,
         "RequestType"=> "1"];
-		return Http::post('http://192.168.56.102/laravel/api/map', $array);	
+		return Http::post('http://192.168.56.102/laravel/api/interface7', $array);	
 	}
 	
+	function sendPostFeedbackStore ()
+	{
+		$array = json_decode('{
+		"InterfaceId": 8,
+		"CurrentUser": "Maria de Jesus",
+		"Feedback":
+		{
+			"StoreId": 3,
+			"comment": "testing rating4",
+			"rating": 4,
+			"UserName": "Maria de Jesus"
+		}
+	}');
+	
+		return Http::post('http://192.168.56.102/laravel/api/interface8', $array);
+	}
+	
+	function sendPostFeedbackItem ()
+	{
+		$array = json_decode('{
+		"InterfaceId": 9,
+		"CurrentUser": "Maria de Jesus",
+		"Feedback":
+		{
+			"ItemId": 3,
+			"comment": "testing rating4",
+			"rating": 4,
+			"UserName": "Maria de Jesus"
+		}
+	}');
+	
+		return Http::post('http://192.168.56.102/laravel/api/interface9', $array);
+	}
+
 	function sendPostProfileCustomer ($type)
 	{
 		switch($type)
@@ -139,9 +209,10 @@ class tests extends Controller
 		{
 			//select base on random 2 number/letter (TESTED)
 			case 0:
-				$letter = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', mt_rand(1, 2))), 1, 2);
+				//$letter = substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', mt_rand(1, 2))), 1, 2);
+				$array = json_decode('{}');
 				//$letter = "Paul";
-				return Http::get('http://192.168.56.102/laravel/api/interface20/' . $letter);
+				return Http::post('http://192.168.56.102/laravel/api/interface20', $array);
 			break;
 			
 			//insert full (TESTED)
@@ -231,7 +302,7 @@ class tests extends Controller
 	function sendPostSeeProfileOwner ()
 	{
 		$array = [
-		"UserName" => "owner2"];
+		"UserName" => "owner6"];
 		return Http::post('http://192.168.56.102/laravel/api/interface27', $array);	
 	}
 	
@@ -248,10 +319,8 @@ class tests extends Controller
 	function sendPostSeeItems ()
 	{
 		$array = [
-		"UserName" => "owner2",
-		"StoreName" => "Continente",
-		"StoreLocation" => "43.949735,125.439307",
-		"StoreFloor" => "111"];
+		"UserName" => "owner2"
+		];
 		return Http::post('http://192.168.56.102/laravel/api/interface29', $array);	
 	}
 	

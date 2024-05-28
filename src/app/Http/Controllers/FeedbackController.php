@@ -35,25 +35,33 @@ class FeedbackController extends Controller
 					
 		if($this->_dbInsert == 1)
 		{
-			$array["InterfaceId"] = 17;
-			$sendFeedbackStore = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $array);
+			$input["InterfaceId"] = 17;
+			//$sendFeedbackStore = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $input);
+			
+			$sendFeedbackStore = false;
 			
 			if ($sendFeedbackStore == false)
 			{
-				$this->_newArray = array("Error" => "algorithm didn't receive the data");
+				$AiReturn = json_decode('{"ERROR": "algorithm didn\'t receive the data"}');
+				
+				$SuccessToken = true;
+				$this->_newArray = array("InterfaceId" => 8, "CurrentUser" => $input["CurrentUser"], 
+								"successful_token" => $SuccessToken, "AiReturn" => $AiReturn);
 			}
 			else
 			{
+				$AIreturn = true;
+				
 				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => $$input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+				$this->_newArray = array("InterfaceId" => 8, "CurrentUser" => $input["CurrentUser"], 
+								"successful_token" => $SuccessToken, "AiReturn" => $AiReturn);
 			}
 		}
 		else
 		{
 			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+			$this->_newArray = array("InterfaceId" => 8, "CurrentUser" => $input["CurrentUser"], 
+								"successful_token" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;
 	}
@@ -88,13 +96,13 @@ class FeedbackController extends Controller
 		{
 			$SuccessToken = true;
 			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+								"successful_token" => $SuccessToken);
 		}
 		else
 		{
 			$SuccessToken = false;
 			$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], 
-								"SuccessToken" => $SuccessToken);
+								"successful_token" => $SuccessToken);
 		}
 		return $newArray = $this->_newArray;
 	}

@@ -124,115 +124,126 @@ class ProfileOwnerController extends Controller
 		$Feedback = [];
 			$save = [];
 		$StoreFloor	= ""; //ONLY TO ADAPT TO OTHER GROUPS CODE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!			
-		//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
-		foreach($this->_dbSelect as $Obj)
+		//Because an instance is created, we need to separete first the diferent rows that comes from the DB
+		if(count($this->_dbSelect) == 1)
 		{
-					//Here we separete each result from DB in their diferent keys and values
-					foreach($Obj as $key => $x)
+			foreach($this->_dbSelect as $Obj)
+			{
+						//Here we separete each result from DB in their diferent keys and values
+				foreach($Obj as $key => $x)
+				{
+					//store Id is necessary to get more necessary data from DB, so we use an "if"
+					//to use this key value in all other select querys
+					if($key === "ID")
 					{
-						//store Id is necessary to get more necessary data from DB, so we use an "if"
-						//to use this key value in all other select querys
-						if($key === "ID")
+						$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+												FROM store s, location l
+												WHERE s.ID = l.IDStore
+												AND s.ID = ?', 
+												[$x]);
+												
+						$coordinates = ""; //JUST TO SAVE SOMETHING TO ADAPT MY CODE TO OTHER GROUPS!!! TEMPORARY!			
+						if(count($temporary) > 0)
+						{						
+							foreach($temporary as $Obj)
+							{
+								foreach($Obj as $key => $y)
+								{
+									$location[$key] = $y;
+									
+									//SAME HERE, ONLY TO ADPAT!!!
+									if($key == "latitude")
+									{
+										$coordinates = $y;
+									}
+									else if($key == "longitude")
+									{
+										$coordinates = $coordinates . "," . $y;
+									}
+									else if($key == "floor")
+									{
+										$StoreFloor = $y;
+									}
+								}
+							}
+							//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+							$location = ""; //clean everything and make it string
+							$location = $coordinates; //transfering values
+						}
+						else
 						{
-							$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-													FROM store s, location l
-													WHERE s.ID = l.IDStore
-													AND s.ID = ?', 
-													[$x]);
-													
-							$coordinates = ""; //JUST TO SAVE SOMETHING TO ADAPT MY CODE TO OTHER GROUPS!!! TEMPORARY!			
+							$location = "ERROR, location not found";
+						}
+
+						$temporary = DB::select('SELECT AVG(rating) AS AvgRate
+												FROM store s, feedback f
+												WHERE s.ID = f.IDStore
+												AND s.ID = ?', 
+												[$x]);
+						
+						if(count($temporary) > 0)
+						{							
+							foreach($temporary as $Objs)
+							{
+								//Here we separete each result from DB in their diferent keys and values
+								foreach($Objs as $keys => $y)
+								{
+									$AvgRate = $y;
+								}
+							}
+						}
+						else
+						{
+							$AvgRate = array("ERROR, Average not possible to calculate"); json_decode('{"ERROR": "algorithm didn\'t receive the data"}');
+						}
+						
+						$temporary = DB::select('SELECT comment, rating
+												FROM item i, store s, feedback f
+												WHERE s.ID = ?
+												AND i.IDStore = s.ID', 
+												[$x]);
+
 							if(count($temporary) > 0)
 							{						
 								foreach($temporary as $Obj)
 								{
+									$oneFeedback = [];
 									foreach($Obj as $key => $y)
 									{
-										$location[$key] = $y;
-										
-										//SAME HERE, ONLY TO ADPAT!!!
-										if($key == "latitude")
-										{
-											$coordinates = $y;
-										}
-										else if($key == "longitude")
-										{
-											$coordinates = $coordinates . "," . $y;
-										}
-										else if($key == "floor")
-										{
-											$StoreFloor = $y;
-										}
+										$oneFeedback[$key] = $y;
 									}
-								}
-								//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
-								$location = ""; //clean everything and make it string
-								$location = $coordinates; //transfering values
-							}
-							else
-							{
-								$location = "ERROR, location not found";
-							}
-
-							$temporary = DB::select('SELECT AVG(rating) AS AvgRate
-													FROM store s, feedback f
-													WHERE s.ID = f.IDStore
-													AND s.ID = ?', 
-													[$x]);
-							
-							if(count($temporary) > 0)
-							{							
-								foreach($temporary as $Objs)
-								{
-									//Here we separete each result from DB in their diferent keys and values
-									foreach($Objs as $keys => $y)
-									{
-										$AvgRate = $y;
-									}
+									array_push($Feedback, $oneFeedback);
 								}
 							}
 							else
 							{
-								$AvgRate = array("ERROR, Average not possible to calculate");
+								$Feedback = array("ERROR, Feedbacks not found");
 							}
-							
-							$temporary = DB::select('SELECT comment, rating
-													FROM item i, store s, feedback f
-													WHERE s.ID = ?
-													AND i.IDStore = s.ID', 
-													[$x]);
+					}
+					else
+					{
+						$save[$key] = $x; //store name
+						$save['StoreLocation'] = $location;
+						$save['StoreFloor'] = $StoreFloor; //AGAIN, TO ADPAT TO OTHER GROUPS CODE!!!!!!!!!!!
+						$save['AvgRate'] = $AvgRate;
+						$save['Feedback'] = $Feedback;
 
-								if(count($temporary) > 0)
-								{						
-									foreach($temporary as $Obj)
-									{
-										$oneFeedback = [];
-										foreach($Obj as $key => $y)
-										{
-											$oneFeedback[$key] = $y;
-										}
-										array_push($Feedback, $oneFeedback);
-									}
-								}
-								else
-								{
-									$Feedback = array("ERROR, Feedbacks not found");
-								}
-						}
-						else
-						{
-							$save[$key] = $x; //store name
-							$save['StoreLocation'] = $location;
-							$save['StoreFloor'] = $StoreFloor; //AGAIN, TO ADPAT TO OTHER GROUPS CODE!!!!!!!!!!!
-							$save['AvgRate'] = $AvgRate;
-							$save['Feedback'] = $Feedback;
-
-							//array_push($StoreList, $save);
-						}
-					}				
+						//array_push($StoreList, $save);
+					}
+				}				
+			}
+			
+			//$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
+			$this->_newArray = array("StoreName" => $save["StoreName"], "StoreLocation" => $save["StoreLocation"], "StoreFloor" => $save["StoreFloor"], "AvgRate" => $save["AvgRate"], "Feedback" => $save["Feedback"]);
 		}
-				
-		//$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
-		$this->_newArray = array("StoreName" => $save["StoreName"], "StoreLocation" => $save["StoreLocation"], "StoreFloor" => $save["StoreFloor"], "AvgRate" => $save["AvgRate"], "Feedback" => $save["Feedback"]);
+		else if(count($this->_dbSelect) == 0)
+		{
+			$this->_newArray = json_decode('{"ERROR": "STORE info doesn\'t exist for this username!"}');
+		}
+		else
+		{
+			$this->_newArray = json_decode('{"ERROR": "Owner account has more then one store. Server not ready for that!"}');
+		}
 		
 		return $newArray = $this->_newArray;
 	}
