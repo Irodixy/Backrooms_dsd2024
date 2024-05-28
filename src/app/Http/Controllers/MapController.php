@@ -10,8 +10,15 @@ class MapController extends Controller
 {
     function DisplayMap (Request $array)
 	{
-		$temporary = [];
+		$input = $array->all();
+
+		if(!array_key_exists("maxDistance", $input))
+		{
+			$input["maxDistance"] = 5;
+		}
 		
+		$temporary = [];
+
 		$this->_dbSelect = DB::select(
 						'SELECT s.ID AS storeId, s.name AS storeName, s.type, s.description AS StoreDescription 
 						FROM store s, location l  
@@ -22,8 +29,8 @@ class MapController extends Controller
 								sin( radians( l.latitude ) ) ) ) <= ? 
 								AND s.ID = l.IDStore 
 						ORDER BY name ASC', 
-						[$array["MyLocation"]["latitude"], $array["MyLocation"]["longitude"], 
-						$array["MyLocation"]["latitude"], $array["maxDistance"]]);
+						[$input["MyLocation"]["latitude"], $input["MyLocation"]["longitude"], 
+						$input["MyLocation"]["latitude"], $input["maxDistance"]]);
 				
 		//Variables to save data and help reorganize the future JSON file			
 		$StoreList = [];
@@ -65,10 +72,10 @@ class MapController extends Controller
 						}
 						else
 						{
-							$location = "ERROR, location not found";
+							$location = json_decode('{"ERROR": "location not found"}');
 						}
 
-						$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+						$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
 											FROM item i, store s
 											WHERE s.ID = ?
 											AND i.IDStore = s.ID', 
@@ -81,14 +88,21 @@ class MapController extends Controller
 								$oneItem = [];
 								foreach($Obj as $key => $y)
 								{
-									$oneItem[$key] = $y;
+									if($key == "ItemImage")
+									{
+										$oneItem[$key] = base64_encode($y);
+									}
+									else
+									{
+										$oneItem[$key] = $y;
+									}
 								}
 								array_push($items, $oneItem);
 							}
 						}
 						else
 						{
-							$items = array("ERROR, item not found");
+							$items = json_decode('{"ERROR": "items not found"}');
 						}
 					}
 					else if($key === "storeName")
@@ -105,9 +119,7 @@ class MapController extends Controller
 					}
 				}				
 			}
-			
-			$this->_newArray = array("InterfaceId" => 7, "CurrentUser" => $array["CurrentUser"],
-										"StoreList" => $StoreList);
+			$this->_newArray = array("InterfaceId" => 7, "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
 			return $newArray = $this->_newArray;
 		break;
 		
@@ -132,7 +144,7 @@ class MapController extends Controller
 					{
 						$save[$key] = $x;
 						
-						$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.imgName AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+						$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
 											FROM item i, store s
 											WHERE s.ID = ?
 											AND i.IDStore = s.ID', 

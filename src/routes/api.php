@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\tests;
+use App\Http\Controllers\test_ai;
 
 use App\Http\Controllers\LoginCustomerController as LoginCustomer;
 use App\Http\Controllers\LoginOwnerController as LoginOwner;
@@ -76,6 +77,13 @@ Route::get('test_customer_feedback_store', [tests::class, 'sendPostFeedbackStore
 Route::get('test_customer_feedback_item', [tests::class, 'sendPostFeedbackItem']); 
 /******* TESTING POSTS!!! ********/
 
+/******* TESTING POSTS_AI!!! ********/
+
+//POST INTERFACE13!!!!!
+Route::post('test_interface13', [test_ai::class, 'interface13']); 
+
+/******* TESTING POSTS_AI!!! ********/
+
 
 //Login Customer
 Route::post("interface1", [LoginCustomer::class, 'LoginCustomer']); 							//interface 1							#TESTED#
@@ -126,7 +134,7 @@ Route::post("interface25", [OwnerProfile::class, 'DeleteOwner']);								//inter
 Route::post("interface26", [Analytics::class, 'Analytics']);									//interface 26 ****SHOULD BE GET****	#TESTED#
 
 Route::post("interface27", [ProfileOwner::class, 'SeeProfile']);								//interface 27 ****SHOULD BE GET****	#TESTED#
-Route::post("interface28", [ProfileOwner::class, 'UpdateProfile']);								//interface 28 ****SHOULD BE PUT****	#TESTED#
+Route::post("interface28", [ProfileOwner::class, 'UpdateOrInsert']);							//interface 28 ****SHOULD BE PUT****	#TESTED#
 
 Route::post("interface29", [Item::class, 'SeeItem']);											//interface 29 ****SHOULD BE GET****	
 Route::post("interface30", [Item::class, 'UpdateOrInsert']);									//interface 30 ****SHOULD BE PUT****	#TESTED#

@@ -309,10 +309,10 @@ class tests extends Controller
 	function sendPostUpdateProfileOwner () //ACTUALLY, ONLY UPDATES STORE INFO!!!!
 	{
 		$array = [
-		"UserName" => "owner2",
-		"StoreName" => "Continente",
-		"StoreLocation" => "43.949735,125.439307",
-		"StoreFloor" => "111"];
+		"UserName" => "	owner6",
+		"StoreName" => "XIAOMI",
+		"StoreLocation" => "3,1",
+		"StoreFloor" => "50"];
 		return Http::post('http://192.168.56.102/laravel/api/interface28', $array);	
 	}
 	

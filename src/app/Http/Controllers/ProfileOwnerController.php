@@ -12,15 +12,126 @@ class ProfileOwnerController extends Controller
 	private $_newArray;
 	private $_dbUpdate;
 	
-    function UpdateProfile (Request $array)
+	function UpdateOrInsert (Request $array)
 	{
 		$input = $array->all();
+		$this->_dbSelect = DB::select('SELECT s.ID
+										FROM users u, store s
+										WHERE u.username = ?
+										AND u.ID = s.IDOwner', 
+										[$input["UserName"]]);
 
+		if(count($this->_dbSelect) == 1)
+		{
+			return $this->UpdateStore($input);
+		}
+		else if(count($this->_dbSelect) == 0)
+		{
+			return $this->InsertStore($input);
+		}
+		else
+		{
+			return json_decode('{"ERROR": "Something went wrong, please try again later"}');
+		}
+		
+	}
+	
+	function InsertStore($array)
+	{
+		$SuccessToken = "";
+		
+		$check = DB::select('SELECT ID 
+							FROM users 
+							WHERE username = ?', 
+							[$array["UserName"]]);
+							
+		if(count($check) == 1)
+		{
+			$UserId = "";
+			foreach($check as $Objs)
+			{
+				//Here we separete each result from DB in their diferent keys and values
+				foreach($Objs as $keys => $x)
+				{
+					$UserId = $x;
+				}
+			}
+			
+			$anotherTemporay = DB::insert('INSERT INTO store
+									(name, IDOwner) 
+									VALUES (?, ?)', 
+									[$array["StoreName"], $UserId]);
+									
+			if($anotherTemporay == 1)
+			{
+				$anotherCheck = DB::select('SELECT ID 
+									FROM store
+									WHERE IDOwner = ?
+									AND name = ?', 
+									[$UserId, $array["StoreName"]]);
+																		
+				if(count($anotherCheck) == 1)
+				{
+					$StoreId = "";
+					foreach($anotherCheck as $Objs)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Objs as $keys => $x)
+						{
+							$StoreId = $x;
+						}
+					}
+					
+					//$values_array[0] is latitude and $values_array[1] is longitude!!!!!
+					$values_array = explode(',', $array["StoreLocation"]);
+					
+					 /* $location = DB::insert('INSERT into location 
+											(IDStore, latitude, longitude, country, state, city, street, number, floor, zipcode) 
+											VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+											[$check, $array["StoreLocation"]["latitude"], $array["StoreLocation"]["longitude"], $array["StoreLocation"]["country"],
+											$array["StoreLocation"]["state"], $array["StoreLocation"]["city"], $array["StoreLocation"]["street"], 
+											$array["StoreLocation"]["number"], $array["StoreLocation"]["floor"], $array["StoreLocation"]["zipcode"]]); */
+											//THIS IS FULL INSERT OF LOCATION, BUT FOR NOW IS NOT IN USE
+											
+					$location = DB::insert('INSERT into location 
+											(IDStore, latitude, longitude, floor) 
+											VALUES (?, ?, ?, ?)', 
+											[$StoreId, $values_array [0], $values_array [1], $array["StoreFloor"]]);
+									
+					if($location == 1)
+					{
+						$this->_newArray = array("SuccessToken" => true);
+					}
+					else
+					{
+						$this->_newArray = json_decode('{"ERROR": "Store location could not be inserted, please try again later"}');
+					}
+				}
+				else
+				{
+					$this->_newArray = json_decode('{"ERROR": "Store should had been inserted, but returns null"}');
+				}
+			}
+			else
+			{
+				$this->_newArray = json_decode('{"ERROR": "Store could not be inserted, please try again later"}');
+			}
+		}
+		else
+		{
+			$this->_newArray = array("SuccessToken" => false);
+		}
+		
+		return $newArray = $this->_newArray;
+	}
+	
+    function UpdateStore($array)
+	{
 		$SuccessToken = "";
 		$this->_dbSelect = DB::select('SELECT ID
 									FROM users 
 									WHERE username = ?', 
-									[$input["UserName"]]);
+									[$array["UserName"]]);
 									
 		/*$this->_dbSelect = DB::select('SELECT ID
 									FROM users 
@@ -49,7 +160,7 @@ class ProfileOwnerController extends Controller
 													
 					foreach($temporary as $Objs)
 					{
-						$values_array = explode(',', $input["StoreLocation"]);
+						$values_array = explode(',', $array["StoreLocation"]);
 						$save =[];
 						//Here we separete each result from DB in their diferent keys and values
 						foreach($Objs as $key => $z)
@@ -64,11 +175,11 @@ class ProfileOwnerController extends Controller
 							}
 							else if ($key == "floor")
 							{
-								$save[$key] = $input["StoreFloor"];
+								$save[$key] = $array["StoreFloor"];
 							}
 						}
-						unset($input["StoreFloor"]);
-						$input["StoreLocation"] = $save;
+						unset($array["StoreFloor"]);
+						$array["StoreLocation"] = $save;
 					}
 				}
 			}
@@ -76,30 +187,26 @@ class ProfileOwnerController extends Controller
 			$ID = 28;
 			
 			$query = new QueryBuilderController();
-			$string = $query -> StringBuilder("UPDATE", $ID, $input);
+			$string = $query -> StringBuilder("UPDATE", $ID, $array);
 			foreach ($this->_dbSelect as $x)
 			{
 				foreach ($x as $y)
 				{
-					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $input);
+					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
 				}
 			}
-			print_r($values);
-			echo $string;
 			
 			$this->_dbUpdate = DB::update($string, $values);
 			
 			if($this->_dbUpdate == 1)
 			{
 				$SuccessToken = true;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 			else
 			{
 				$SuccessToken = false;
-				$this->_newArray = array("InterfaceId" => $array["InterfaceId"], "CurrentUser" => $array["CurrentUser"], 
-									"SuccessToken" => $SuccessToken);
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 		}
 		else
