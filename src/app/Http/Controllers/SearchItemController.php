@@ -11,11 +11,11 @@ class SearchItemController extends Controller
 	{
 		$input = $array->all();
 		
-		$temporary = [];
+		$ItemList = [];
 		
 		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, 
-												i.image AS ItemImage, i.IDStore AS ItemStoreId
-												FROM item i
+												i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+												FROM item i, store s
 												WHERE i.name LIKE ?', 
 												['%' . $input["ItemName"] . '%']);
 												
@@ -30,20 +30,44 @@ class SearchItemController extends Controller
 					{
 						$oneItem[$key] = base64_encode($x);
 					}
+					else if($key == "ItemStoreId")
+					{
+						$oneItem[$key] = $x;
+						
+						$temporary = DB::select('SELECT name AS ItemStoreName
+												FROM store
+												WHERE ID = ?', 
+												[$x]);
+												
+						if(count($temporary) == 1)
+						{
+							foreach($temporary as $id)
+							{
+								foreach($id as $keys => $y)
+								{
+									$oneItem[$keys] = $y;
+								}
+							}
+						}
+						else
+						{
+							$oneItem[$keys] = json_decode('{"ERROR": "Impossible result, no store name found!"}');
+						}
+					}
 					else
 					{
 						$oneItem[$key] = $x;
 					}
 				}
-				array_push($temporary, $oneItem);
+				array_push($ItemList, $oneItem);
 			}
 		}
 		else
 		{
-			$temporary = array("ERROR" => "No item found!");
+			$ItemList = json_decode('{"ERROR": "No item found!"}');
 		}
 		
-		$this->_newArray = array("InterfaceId" => 6, "CurrentUser" => $input["CurrentUser"], "ItemList" => $temporary);
+		$this->_newArray = array("InterfaceId" => 6, "CurrentUser" => $input["CurrentUser"], "ItemList" => $ItemList);
 		return $newArray = $this->_newArray;
 	}
 }

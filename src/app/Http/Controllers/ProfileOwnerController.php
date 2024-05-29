@@ -211,7 +211,7 @@ class ProfileOwnerController extends Controller
 		}
 		else
 		{
-			$this->_dbUpdate = "ERROR, User not Found!";
+			$this->_newArray = json_decode('{"ERROR": "User not Found!"}');
 		}
 		return $newArray = $this->_newArray;
 	}

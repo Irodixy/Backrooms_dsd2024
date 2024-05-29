@@ -111,7 +111,7 @@ Route::post("interface8", [Feedback::class, 'SaveFeedbackStore']);								//inte
 Route::post("interface9", [Feedback::class, 'SaveFeedbackItem']);								//interface 9							
 
 Route::post("interface10", [ProfileCustomer::class, 'UpdateProfile']);							//interface 10 ****NEED TO BE PUT****	
-Route::get("interface11/{CurrentUser}", [ProfileCustomer::class, 'SeeProfile']);				//interface 11							
+Route::post("interface11", [ProfileCustomer::class, 'SeeProfile']);								//interface 11							
 
 Route::post("interface12", [RegistrationCustomer::class, 'RegistrationCustomer']); 				//interface 12							#TESTED#
 

@@ -57,12 +57,14 @@ class ProfileCustomerController extends Controller
 		return $newArray = $this->_newArray;
 	}
 	
-	function SeeProfile ($CurrentUser)
+	function SeeProfile (Request $array)
 	{
+		$input = $array->all();
+		
 		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday
 												FROM users u
 												WHERE u.username = ?',
-												[$CurrentUser]);
+												[$input["CurrentUser"]]);
 				
 		$save = [];
 		$Interests = [];	
@@ -104,17 +106,17 @@ class ProfileCustomerController extends Controller
 				}
 			}
 			
-			$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $CurrentUser, "UserName" => $save["UserName"], "Birthday" => $save["Birthday"], "Interests" => $string);
+			$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $input["CurrentUser"], "UserName" => $save["UserName"], "Birthday" => $save["Birthday"], "Interests" => $string);
 		}
 		
 		else if(count($this->_dbSelect) == 0)
 		{
-			$this->_newArray = array("ERROR" => "Someting didn't work. No User found with CurrentUser Username!");
+			$this->_newArray = json_decode('{"ERROR": "Someting didn\'t work. No User found with CurrentUser Username!"}');
 		}
 		
 		else
 		{
-			$this->_newArray = array("ERROR" => "Someting didn't work. No User found with CurrentUser Username!");
+			$this->_newArray = json_decode('{"ERROR": "Someting didn\'t work. No User found with CurrentUser Username!"}');
 		}
 		
 		return $newArray = $this->_newArray;		

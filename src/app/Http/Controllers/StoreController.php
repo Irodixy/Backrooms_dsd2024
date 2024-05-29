@@ -110,31 +110,42 @@ class StoreController extends Controller
 							WHERE username = ?', 
 							[$input["CurrentUser"]]);
 		
-		foreach($temporary as $Obj)
+		if(count($temporary) == 1)
 		{
-			//Here we separete each result from DB in their diferent keys and values
-			foreach($Obj as $key => $x)
+			foreach($temporary as $Obj)
 			{
-				$save[$key] = $x;
+				//Here we separete each result from DB in their diferent keys and values
+				foreach($Obj as $key => $x)
+				{
+					$save[$key] = $x;
+				}
+			}
+			
+			foreach ($input["History"] as $search)
+			{
+				$this->_dbInsert = DB::insert('INSERT INTO huntedstore (IDUser, IDStore, date_time) values(?, ?, ?)', 
+											[$save["userId"], $search["StoreId"], $search["VisitTime"]]);
+			}
+			
+											
+			if($this->_dbInsert == 1)
+			{
+				$SuccessToken = true;
+				$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
+			}
+			else
+			{
+				$SuccessToken = false;
+				$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
 			}
 		}
-		
-		foreach ($input["HuntedStoreIdList"] as $search)
+		else if(count($temporary) <= 0)
 		{
-			$this->_dbInsert = DB::insert('INSERT INTO huntedstore (IDUser, IDStore, date_time) values(?, ?, ?)', 
-										[$save["userId"], $search["StoreId"], $search["VisitTime"]]);
-		}
-		
-										
-		if($this->_dbInsert == 1)
-		{
-			$SuccessToken = true;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
+			$this->_newArray = json_decode('{"ERROR": "No account with this username! Review what\'s happening!"}');
 		}
 		else
 		{
-			$SuccessToken = false;
-			$this->_newArray = array("InterfaceId" => 4, "CurrentUser" => $input["CurrentUser"], "successful_token" => $SuccessToken);
+			$this->_newArray = json_decode('{"ERROR": "Many accounts with same username! Review what\'s happening!"}');
 		}
 		return $newArray = $this->_newArray;
 	}
