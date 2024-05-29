@@ -40,7 +40,7 @@ class ItemController extends Controller
 		$input = $array->all();
 		
 		//THIS ONE IS THE ADAPTATION FOR THE CODE WITH OTHER GROUPS
-		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage
+		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.base_image
 										FROM item i, store s, users u
 										WHERE i.IDStore = s.ID
 										AND s.IDOwner = u.ID
@@ -67,6 +67,10 @@ class ItemController extends Controller
 					if($key == "ItemImage")
 					{
 						$oneItem[$key] = base64_encode($x);
+					}
+					else if($key == "base_image")
+					{
+						$oneItem["ItemImage"] = $x . $oneItem["ItemImage"];
 					}
 					else
 					{
@@ -97,7 +101,8 @@ class ItemController extends Controller
 		if($this->_dbSelect == 1)
 		{
 			//IMAGE IS CONVERTED IN VARBINARY!!!!
-			$temporary = base64_decode($array["ItemImage"]);
+			$prepareImage = explode(',', $array["ItemImage"]);
+			$temporary = base64_decode($prepareImage[1]);
 			$array["ItemImage"] = $temporary;
 			
 			foreach($temporary as $Objs)
@@ -105,10 +110,10 @@ class ItemController extends Controller
 				//Here we separete each result from DB in their diferent keys and values
 				foreach($Objs as $keys => $x)
 				{
-					$this->_dbInsert = DB::insert('INSERT INTO item (ID, name, price, description, image, IDStore) 
-													values (?, ?, ?, ?, ?, ?)', 
+					$this->_dbInsert = DB::insert('INSERT INTO item (ID, name, price, description, image, base_image, IDStore) 
+													values (?, ?, ?, ?, ?, ?, ?)', 
 													[$array["ItemId"] , $array["ItemName"], $array["ItemPrice"], $array["ItemDescription"], 
-													$array["ItemImage"], $x]);
+													$array["ItemImage"], $prepareImage[0], $x]);
 													
 					if($this->_dbInsert == 1)
 					{
@@ -141,8 +146,10 @@ class ItemController extends Controller
 		if (count($this->_dbSelect) == 1)
 		{
 			//IMAGE IS SAVED IN VARBINARY!!!!
-			$temporary = base64_decode($array["ItemImage"]);
+			$prepareImage = explode(',', $array["ItemImage"]);
+			$temporary = base64_decode($prepareImage[1]);
 			$array["ItemImage"] = $temporary;
+			$array["ItemBase_image"] = $prepareImage[0];
 			
 			$ID = 30;
 			$query = new QueryBuilderController();

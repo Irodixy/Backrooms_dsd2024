@@ -14,8 +14,8 @@ class SearchItemController extends Controller
 		$ItemList = [];
 		
 		$this->_dbSelect = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, 
-												i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
-												FROM item i, store s
+												i.image AS ItemImage, i.base_image, i.IDStore AS ItemStoreId
+												FROM item i
 												WHERE i.name LIKE ?', 
 												['%' . $input["ItemName"] . '%']);
 												
@@ -29,6 +29,10 @@ class SearchItemController extends Controller
 					if($key == "ItemImage")
 					{
 						$oneItem[$key] = base64_encode($x);
+					}
+					else if($key == "base_image")
+					{
+						$oneItem["ItemImage"] = $x . $oneItem["ItemImage"];
 					}
 					else if($key == "ItemStoreId")
 					{

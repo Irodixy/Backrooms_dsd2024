@@ -45,9 +45,10 @@ class UserProfileController extends Controller
 			$input["UserSearched"] = "";
 		}
 		
-		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
+		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
 										FROM users u
-										WHERE u.username LIKE ?',
+										WHERE u.username LIKE ?
+										AND type = "customer"',
 										['%' . $input["UserSearched"] . '%']);
 				
 		$UserData = [];
@@ -60,7 +61,7 @@ class UserProfileController extends Controller
 			//Here we separete each result from DB in their diferent keys and values
 			foreach($Obj as $key => $x)
 			{
-				if($key != "ID")
+				if($key != "UserId")
 				{
 					$save[$key] = $x;
 				}
@@ -74,21 +75,25 @@ class UserProfileController extends Controller
 										AND u.ID = i.IDUser',
 										[$x]);
 					
-					$string = "";
 					foreach($temporary as $Objs)
 					{
+						$oneInterest = [];
 						//Here we separete each result from DB in their diferent keys and values
 						foreach($Objs as $keys => $y)
 						{
 							if($keys != "IDUser")
 							{
-								$Interests[$keys] = $y;
+								if($y > 0)
+								{
+									$oneInterest[$keys] = $keys;
+								}
 							}
 						}
-						//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
-						$values = array_values($Interests);
-						$string = implode(',', $values);
+						$Interests = $oneInterest;
 					}
+					//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+					$values = array_values($Interests);
+					$string = implode(',', $values);
 					
 					$save["Interests"] = $string;
 				}
@@ -113,63 +118,122 @@ class UserProfileController extends Controller
 	{
 		$temporary = DB::select('SELECT ID
 								FROM users 
-								WHERE ID = ?', 
+								WHERE ID = ?
+								AND type = "customer"', 
 								[$array["UserId"]]);
 
-		if (count($temporary) == 1)
+		if(count($temporary) == 1)
 		{
 			//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 			$liteInterests = DB::select('SELECT *
 										FROM interests
-										WHERE ID = ?', 
+										WHERE IDUser = ?', 
 										[$array["UserId"]]);
-										
-			foreach($temporary as $Objs)
+								
+			if(count($liteInterests) == 1)
+			{				
+				foreach($liteInterests as $Objs)
 				{
-					$values_array = explode(',', $array["Interests"]);
+					$values_array = array_map("strtolower", explode(',', $array["Interests"]));
+					$number = count($values_array);
+					
 					$i = 0;
 					$save =[];
+					
+					$count = 0;
+					$changeInterests = [];
+					
 					//Here we separete each result from DB in their diferent keys and values
 					foreach($Objs as $key => $x)
 					{
-						if ($key != "IDUser")
+						if($key != "IDUser")
 						{
-							$save[$key] = $values_array[$i];
-							$i++;
+							foreach($values_array as $keys => $y)
+							{
+								if($key == $y)
+								{
+									$count++;
+									$changeInterests[$y] = mt_rand(1, 100);
+								}
+							}
 						}
+					}						
+					
+					if($count == $number)
+					{
+						$array["Interests"] = [];
+						$array["Interests"] = $changeInterests;
 					}
-					$array["Interests"] = [];
-					array_push($array["Interests"], $save);
+					else if($count < $number)
+					{
+						//this one connects with the table Interests from DB
+						foreach($Objs as $key => $x)
+						{
+							$countAgain = 0;
+							//this one connects with the values coming from frontend
+							foreach($values_array as $keys => $y)
+							{
+								if($key != "IDUser")
+								{
+									//this one calculates if interest is different from all the ones already in DB
+									if($key != $y)
+									{
+										$countAgain++;
+										echo $countAgain;
+									}
+									
+									if($countAgain == $number)
+									{
+										DB::statement('ALTER TABLE interests ADD ' . $y . ' INTEGER(5) DEFAULT 0');
+										$changeInterests[$y] = mt_rand(1, 100);
+									}
+								}
+							}
+						}
+						$array["Interests"] = [];
+						$array["Interests"] = $changeInterests;
+						
+					}
 				}
-			
-			$ID = 21;
-			$query = new QueryBuilderController();
-			$string = $query -> StringBuilder("UPDATE", $ID, $array);
-			foreach ( $temporary as $x)
-			{
-				foreach ($x as $y)
+
+				$ID = 21;
+				$query = new QueryBuilderController();
+				$string = $query -> StringBuilder("UPDATE", $ID, $array);
+				foreach ( $temporary as $x)
 				{
-					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+					foreach ($x as $y)
+					{
+						$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+					}
+				}
+				
+				$this->_dbUpdate = DB::update($string, $values);
+				
+				if($this->_dbUpdate == 1)
+				{
+					$SuccessToken = true;
+					$this->_newArray = array("SuccessToken" => $SuccessToken);
+				}
+				else
+				{
+					$SuccessToken = false;
+					$this->_newArray = array("SuccessToken" => $SuccessToken);
 				}
 			}
-			
-			$this->_dbUpdate = DB::update($string, $values);
-			
-			if($this->_dbUpdate == 1)
+			else if(count($liteInterests) == 0)
 			{
-				$SuccessToken = true;
-				$this->_newArray = array("SuccessToken" => $SuccessToken);
+				$this->_newArray = json_decode('{"ERROR": "Interests not found, contact the admin!"}');
 			}
 			else
 			{
-				$SuccessToken = false;
-				$this->_newArray = array("SuccessToken" => $SuccessToken);
+				$this->_newArray = json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
 			}
 		}
 		else
 		{
 			$this->_newArray = json_decode('{"ERROR": "User not Found!"}');
 		}
+		
 		return $newArray = $this->_newArray;	
 	}
 	
@@ -222,7 +286,8 @@ class UserProfileController extends Controller
 		$input = $array->all();
 		
 		$this->_dbDelete = DB::delete('DELETE FROM users
-										WHERE ID = ?',
+										WHERE ID = ?
+										AND type = "customer"',
 										[$input["UserId"]]);
 												
 		if($this->_dbDelete == 1)

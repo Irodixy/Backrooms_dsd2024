@@ -82,22 +82,27 @@ class ProfileCustomerController extends Controller
 					}
 					else
 					{
-					$this->_dbSelect = DB::select('SELECT i.*
+					$temporary = DB::select('SELECT i.*
 													FROM users u, interests i
 													WHERE u.ID = ?
 													AND u.ID = i.IDUser',
 													[$x]);
 															
-							foreach($this->_dbSelect as $Obj)
+							foreach($temporary as $Objs)
 							{
+								$oneInterest = [];
 								//Here we separete each result from DB in their diferent keys and values
-								foreach($Obj as $keys => $y)
+								foreach($Objs as $keys => $y)
 								{
 									if($keys != "IDUser")
 									{
-										$Interests[$key] = $y;
+										if($y > 0)
+										{
+											$oneInterest[$keys] = $keys;
+										}
 									}
 								}
+								$Interests = $oneInterest;
 							}
 							//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 							$values = array_values($Interests);

@@ -14,7 +14,7 @@ class HistoryController extends Controller
 		$input = $array->all();
 		$temporary = [];
 		
-		$this->_dbSelect = DB::select('SELECT s.ID, s.name, h.date_time 
+		$this->_dbSelect = DB::select('SELECT s.ID AS StoreId, s.name AS StoreName, h.date_time AS VisitTime
 												FROM store s, huntedstore h, users u 
 												WHERE u.username = ? 
 												AND u.ID = h.IDUser 
@@ -35,10 +35,10 @@ class HistoryController extends Controller
 		}
 		else
 		{
-			$temporary = array("ERROR" => "No History to show");
+			$temporary = json_decode('{"ERROR": "No History to show"}');
 		}
 					
-		$this->_newArray = array("InterfaceId" => 5, "CurrentUser" => $input["CurrentUser"], "HuntedStoreIdList" => $temporary);
+		$this->_newArray = array("InterfaceId" => 5, "CurrentUser" => $input["CurrentUser"], "History" => $temporary);
 		return $newArray = $this->_newArray;
 	}
 }

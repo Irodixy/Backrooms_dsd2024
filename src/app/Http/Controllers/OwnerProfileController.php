@@ -294,8 +294,9 @@ class OwnerProfileController extends Controller
 		$input = $array->all();
 		
 		$this->_dbDelete = DB::delete('DELETE FROM users
-												WHERE ID = ?',
-												[$input["UserId"]]);
+										WHERE ID = ?
+										AND type = "owner"',
+										[$input["UserId"]]);
 												
 		if($this->_dbDelete == 1)
 			{
