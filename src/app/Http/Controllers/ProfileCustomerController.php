@@ -39,7 +39,7 @@ class ProfileCustomerController extends Controller
 			
 			$this->_dbUpdate = DB::update($string, $values);
 			
-			if($this->_dbUpdate == 1)
+			if($this->_dbUpdate >= 1)
 			{
 				$SuccessToken = true;
 				$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);

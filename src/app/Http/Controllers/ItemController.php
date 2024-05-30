@@ -181,7 +181,7 @@ class ItemController extends Controller
 			echo($string);*/
 			$this->_dbUpdate = DB::update($string, $values);
 			
-			if($this->_dbUpdate == 1)
+			if($this->_dbUpdate >= 1)
 			{
 				$SuccessToken = true;
 				$this->_newArray = array("SuccessToken" => $SuccessToken);

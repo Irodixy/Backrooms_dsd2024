@@ -13,9 +13,10 @@ class UserProfileController extends Controller
 	private $_dbDelete;
 	private $_newArray;
 	
-	function UpdateOrInsert (Request $array)
+	public function UpdateOrInsert(Request $array)
 	{
 		$input = $array->all();
+		
 		$this->_dbSelect = DB::select('SELECT ID
 										FROM users 
 										WHERE ID = ?', 
@@ -124,6 +125,30 @@ class UserProfileController extends Controller
 
 		if(count($temporary) == 1)
 		{
+			if(array_key_exists("Email", $array))
+			{
+				$email = DB::select('SELECT ID
+									FROM users
+									WHERE email = ?',
+									[$array["Email"]]);
+									
+				if(count($email) == 1)
+				{
+					foreach($email as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Email already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
+			
 			//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 			$liteInterests = DB::select('SELECT *
 										FROM interests
@@ -208,7 +233,7 @@ class UserProfileController extends Controller
 				
 				$this->_dbUpdate = DB::update($string, $values);
 				
-				if($this->_dbUpdate == 1)
+				if($this->_dbUpdate >= 1)
 				{
 					$SuccessToken = true;
 					$this->_newArray = array("SuccessToken" => $SuccessToken);

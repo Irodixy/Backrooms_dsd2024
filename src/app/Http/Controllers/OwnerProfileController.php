@@ -31,7 +31,7 @@ class OwnerProfileController extends Controller
 		}
 		else
 		{
-			return "Something went wrong, please try again later";
+			return json_decode('{"ERROR": "Something went wrong, please try again later"}');
 		}
 		
 	}
@@ -143,6 +143,14 @@ class OwnerProfileController extends Controller
 								FROM users 
 								WHERE ID = ?', 
 								[$array["UserId"]]);
+								
+		//ADAPT THE VALUES OF OTHER GROUPS TO BE USE BY MY CODE!!!!
+		$values_array = explode(',', $array["StoreLocation"]);
+		$array["StoreLocation"] =[];
+		$array["StoreLocation"]["latitude"] = $values_array[0];
+		$array["StoreLocation"]["longitude"] = $values_array[1];
+		$array["StoreLocation"]["floor"] = $array["StoreFloor"];
+		unset($array["StoreFloor"]);
 
 		if (count($temporary) == 1)
 		{
@@ -157,10 +165,10 @@ class OwnerProfileController extends Controller
 					$values = $query -> ArrayBuilder("UPDATE", $ID, $array["UserId"], $array);
 				}
 			}
-			
+
 			$this->_dbUpdate = DB::update($string, $values);
 			
-			if($this->_dbUpdate == 1)
+			if($this->_dbUpdate >= 1)
 			{
 				$SuccessToken = true;
 				$newArray = array("SuccessToken" => $SuccessToken);

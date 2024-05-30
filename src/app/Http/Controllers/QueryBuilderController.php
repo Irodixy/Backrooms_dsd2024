@@ -210,7 +210,7 @@ class QueryBuilderController extends Controller
 												WHERE IDOwner = ?',
 												[$idUser]);
 												
-				if ($this->_dbSelect == 1)
+				if (count($this->_dbSelect) == 1)
 				{
 					foreach($this->_dbSelect as $Obj)
 					{
