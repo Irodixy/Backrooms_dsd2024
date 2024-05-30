@@ -179,12 +179,11 @@ class UserProfileController extends Controller
 									if($key != $y)
 									{
 										$countAgain++;
-										echo $countAgain;
 									}
 									
 									if($countAgain == $number)
 									{
-										DB::statement('ALTER TABLE interests ADD ' . $y . ' INTEGER(5) DEFAULT 0');
+										DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
 										$changeInterests[$y] = mt_rand(1, 100);
 									}
 								}
