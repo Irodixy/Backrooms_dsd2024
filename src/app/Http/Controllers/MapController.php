@@ -128,24 +128,32 @@ class MapController extends Controller
 				//CODE TO REQUEST INFO FROM AI!!!!
 				//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
 				// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
-			
-				$save = Http::post('http://13.79.99.190/api/interface7', $array);
+				
+				$againInterface7 = json_decode('{
+				"InterfaceId": 7,
+				"CurrentUser": "' . $input["CurrentUser"] . '",
+				"MyLocation": 
+				{
+					"latitude": ' . $input["MyLocation"]["latitude"] . ',
+					"longitude": ' . $input["MyLocation"]["longitude"] . '
+				},
+				"RequestType": 1
+				}');
+				
+				$save = Http::post('http://13.79.99.190/api/interface7', $againInterface7);
 				$interface13 = $save->json();
 				$interface13["InterfaceId"] = 13;
-
+				
 				$interface14 = $this->interface14($input["CurrentUser"]);
 				
 				$jsonFile = array("Interface13" => $interface13, "Interface14" => $interface14);
-				
+				//print_r($jsonFile);
 				$save = Http::post('https://u69070-9b28-34756fc5.westb.seetacloud.com:8443/require_recommendation', $jsonFile);
 				$interface16 = $save->json();
-				
-				if(count($interface16) > 0)
+
+				if($interface16)
 				{
-					if ($SuccessToken == false)
-					{
-						return $interface16;
-					}
+					return $interface16;
 				}
 				else
 				{
