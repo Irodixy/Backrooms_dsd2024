@@ -32,7 +32,7 @@ class SearchItemController extends Controller
 					}
 					else if($key == "base_image")
 					{
-						$oneItem["ItemImage"] = $x . $oneItem["ItemImage"];
+						$oneItem["ItemImage"] = $x . ',' . $oneItem["ItemImage"];
 					}
 					else if($key == "ItemStoreId")
 					{

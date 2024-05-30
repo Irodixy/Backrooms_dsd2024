@@ -70,7 +70,7 @@ class ItemController extends Controller
 					}
 					else if($key == "base_image")
 					{
-						$oneItem["ItemImage"] = $x . $oneItem["ItemImage"];
+						$oneItem["ItemImage"] = $x . ',' . $oneItem["ItemImage"];
 					}
 					else
 					{
