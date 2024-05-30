@@ -98,14 +98,14 @@ class ItemController extends Controller
 										[$array["UserName"]]); //ONLY POSSIBLE IF OWNER AS ONLY ONE STORE!!!
 															   //FUTURE UPGRADE SHOULD NOT NEED THIS, AND USE ONLY IDStore FOR IDENTIFICATION!!!!!!!
 										
-		if($this->_dbSelect == 1)
+		if(count($this->_dbSelect) == 1)
 		{
 			//IMAGE IS CONVERTED IN VARBINARY!!!!
 			$prepareImage = explode(',', $array["ItemImage"]);
 			$temporary = base64_decode($prepareImage[1]);
 			$array["ItemImage"] = $temporary;
 			
-			foreach($temporary as $Objs)
+			foreach($this->_dbSelect as $Objs)
 			{
 				//Here we separete each result from DB in their diferent keys and values
 				foreach($Objs as $keys => $x)
