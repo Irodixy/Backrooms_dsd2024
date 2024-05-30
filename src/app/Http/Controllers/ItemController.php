@@ -100,10 +100,23 @@ class ItemController extends Controller
 										
 		if(count($this->_dbSelect) == 1)
 		{
-			//IMAGE IS CONVERTED IN VARBINARY!!!!
-			$prepareImage = explode(',', $array["ItemImage"]);
-			$temporary = base64_decode($prepareImage[1]);
-			$array["ItemImage"] = $temporary;
+			if(array_key_exists("ItemImage", $array))
+			{
+				//IMAGE IS CONVERTED IN VARBINARY!!!!
+				$prepareImage = explode(',', $array["ItemImage"]);
+				$temporary = base64_decode($prepareImage[1]);
+				$array["ItemImage"] = $temporary;
+			}
+			else
+			{
+				$array["ItemImage"] = "Not Found";
+				$prepareImage[0] = NULL;
+			}
+			
+			if(!array_key_exists("ItemDescription", $array))
+			{
+				$array["ItemDescription"] = NULL;
+			}
 			
 			foreach($this->_dbSelect as $Objs)
 			{
@@ -145,11 +158,14 @@ class ItemController extends Controller
 
 		if (count($this->_dbSelect) == 1)
 		{
-			//IMAGE IS SAVED IN VARBINARY!!!!
-			$prepareImage = explode(',', $array["ItemImage"]);
-			$temporary = base64_decode($prepareImage[1]);
-			$array["ItemImage"] = $temporary;
-			$array["ItemBase_image"] = $prepareImage[0];
+			if(array_key_exists("ItemImage", $array))
+			{
+				//IMAGE IS SAVED IN VARBINARY!!!!
+				$prepareImage = explode(',', $array["ItemImage"]);
+				$temporary = base64_decode($prepareImage[1]);
+				$array["ItemImage"] = $temporary;
+				$array["ItemBase_image"] = $prepareImage[0];
+			}
 			
 			$ID = 30;
 			$query = new QueryBuilderController();
