@@ -38,7 +38,7 @@ class MapController extends Controller
 			$items = [];
 			$save = [];
 		
-		switch($array["RequestType"])
+		switch($input["RequestType"])
 		{
 			//CUSTOMER SEES STORES WITHIN X DISTANCE
 			case 1:
@@ -121,89 +121,225 @@ class MapController extends Controller
 			}
 			$this->_newArray = array("InterfaceId" => 7, "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
 			return $newArray = $this->_newArray;
-		break;
+			break;
 		
-		//USER SEES STORES RECOMENDED FROM AI
-		case 2:
-			//CODE TO REQUEST INFO FROM AI!!!!
-			//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
-			// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
-		
-		
-		//SELECT FOR INTERFACE 13!!!!!!
-		
-			//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
-			foreach($this->_dbSelect as $Obj)
-			{
-				//Here we separete each result from DB in their diferent keys and values
-				foreach($Obj as $key => $x)
-				{
-					//store Id is necessary to get more necessary data from DB, so we use an "if"
-					//to use this key value in all other select querys
-					if($key === "storeId")
-					{
-						$save[$key] = $x;
-						
-						$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
-											FROM item i, store s
-											WHERE s.ID = ?
-											AND i.IDStore = s.ID', 
-											[$x]);
+			//USER SEES STORES RECOMENDED FROM AI
+			case 2:
+				//CODE TO REQUEST INFO FROM AI!!!!
+				//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
+				// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
+			
+				$save = Http::post('http://13.79.99.190/api/interface7', $array);
+				$interface13 = $save->json();
+				$interface13["InterfaceId"] = 13;
 
-						if(count($temporary) > 0)
-						{						
-							foreach($temporary as $Obj)
-							{
-								$oneItem = [];
-								foreach($Obj as $key => $y)
+				$interface14 = $this->interface14($input["CurrentUser"]);
+				
+				$jsonFile = array("Interface13" => $interface13, "Interface14" => $interface14);
+				
+				$save = Http::post('https://u69070-9b28-34756fc5.westb.seetacloud.com:8443/require_recommendation', $jsonFile);
+				$interface16 = $save->json();
+				
+				if(count($interface16) > 0)
+				{
+					if ($SuccessToken == false)
+					{
+						return $interface16;
+					}
+				}
+				else
+				{
+					return json_decode('{"ERROR": "Fail to send information to server. Please try again later"}');
+				}
+
+			
+				/*
+				//SELECT FOR INTERFACE 13!!!!!!
+				
+				//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						//store Id is necessary to get more necessary data from DB, so we use an "if"
+						//to use this key value in all other select querys
+						if($key === "storeId")
+						{
+							$save[$key] = $x;
+							
+							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+												FROM item i, store s
+												WHERE s.ID = ?
+												AND i.IDStore = s.ID', 
+												[$x]);
+
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
 								{
-									$oneItem[$key] = $y;
+									$oneItem = [];
+									foreach($Obj as $key => $y)
+									{
+										$oneItem[$key] = $y;
+									}
+									array_push($items, $oneItem);
 								}
-								array_push($items, $oneItem);
+							}
+							else
+							{
+								$items = array("ERROR, item not found");
 							}
 						}
-						else
+						else if($key === "storeName")
 						{
-							$items = array("ERROR, item not found");
+							$save[$key] = $x;
 						}
-					}
-					else if($key === "storeName")
+						else if($key === "StoreDescription")
+						{
+							$save['items'] = $items;
+							$save[$key] = $x;
+							
+							array_push($StoreList, $save);
+						}
+					}				
+				}
+				
+				$pickStores = array("InterfaceId" => 13, "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
+				
+				$SuccessToken = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $pickStores);
+				
+				if ($SuccessToken == false)
+				{
+					return "Fail to send information to server. Please try again later";
+				}
+				
+				
+				//Select info of USER FOR INTERFACE 14
+				
+				$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
+												FROM users u
+												WHERE u.username = ?', 
+												[$array["CurrentUser"]]);
+				
+				//Variables to save data and help reorganize the future JSON file			
+				$UserData = [];
+				$Interests = [];
+				$HuntedStoreIdList = [];
+				$save = [];
+					
+				//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
+				foreach($this->_dbSelect as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
 					{
-						$save[$key] = $x;
-					}
-					else if($key === "StoreDescription")
-					{
-						$save['items'] = $items;
-						$save[$key] = $x;
-						
-						array_push($StoreList, $save);
-					}
-				}				
-			}
-			
-			$pickStores = array("InterfaceId" => 13, "CurrentUser" => $array["CurrentUser"], "StoreList" => $StoreList);
-			
-			$SuccessToken = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $pickStores);
-			
-			if ($SuccessToken == false)
-			{
-				return "Fail to send information to server. Please try again later";
-			}
-			
-			
-			//Select info of USER FOR INTERFACE 14
-			
-			$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
+						//store Id is necessary to get more necessary data from DB, so we use an "if"
+						//to use this key value in all other select querys
+						if($key === "UserId")
+						{
+							$save[$key] = $x;
+							
+							$temporary = DB::select('SELECT i.*
+												FROM users u, interests i
+												WHERE u.ID = ?
+												AND u.ID = i.IDUser', 
+												[$x]);
+												
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
+								{
+									foreach($Obj as $key => $y)
+									{
+										$Interests[$key] = $y;
+									}
+								}
+							}
+							else
+							{
+								$Interests = "ERROR, interests not found";
+							}
+							//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+							$values = array_values($Interests);
+							$string = implode(',', $values);
+
+							$temporary = DB::select('SELECT IDStore AS StoreId, date_time AS VisitTime
+												FROM huntedstore
+												WHERE IDUser = ?', 
+												[$x]);
+
+							if(count($temporary) > 0)
+							{						
+								foreach($temporary as $Obj)
+								{
+									$oneSearch = [];
+									foreach($Obj as $key => $y)
+									{
+										$oneSearch[$key] = $y;
+									}
+									array_push($HuntedStoreIdList, $oneSearch);
+								}
+							}
+							else
+							{
+								$HuntedStoreIdList = array("ERROR, item not found");
+							}
+						}
+						else 
+						{
+							$save[$key] = $x;
+						}
+					}				
+				}
+				
+				$save['Interests'] = $string;
+				$save['HuntedStoreIdList'] = $HuntedStoreIdList;
+
+				array_push($UserData, $save);
+				
+				$pickUser = array("InterfaceId" => 14, "CurrentUser" => $array["CurrentUser"], "UserData" => $UserData);
+										
+				$SuccessToken = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $pickUser);
+				
+				if ($SuccessToken == false)
+				{
+					return "Fail to send information to server. Please try again later";
+				};
+				
+				//AFTER SENDING ALL THE NEED INFO, REQUEST A GET TO RECEIVE THE NECESSARY RECOMMENDATION!!!
+				
+				$response = Http::get('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation');
+
+				if ($response->ok()) 
+				{
+				  return $response;
+				} 
+				else 
+				{
+				  return ("Recommendation not possible for error of the system, please try again later :)");
+				}*/
+			break;
+		}
+		
+	}
+	
+	function interface14 ($name)
+	{
+		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
 											FROM users u
 											WHERE u.username = ?', 
-											[$array["CurrentUser"]]);
-			
-			//Variables to save data and help reorganize the future JSON file			
-			$UserData = [];
-			$Interests = [];
-			$HuntedStoreIdList = [];
-			$save = [];
-				
+											[$name]);
+
+		//Variables to save data and help reorganize the future JSON file			
+		$UserData = [];
+		$Interests = [];
+		$HuntedStoreIdList = [];
+		$save = [];
+		$string = "";
+
+		if(count($this->_dbSelect) == 1)
+		{
 			//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
 			foreach($this->_dbSelect as $Obj)
 			{
@@ -212,7 +348,7 @@ class MapController extends Controller
 				{
 					//store Id is necessary to get more necessary data from DB, so we use an "if"
 					//to use this key value in all other select querys
-					if($key === "UserId")
+					if($key == "UserId")
 					{
 						$save[$key] = $x;
 						
@@ -228,7 +364,10 @@ class MapController extends Controller
 							{
 								foreach($Obj as $key => $y)
 								{
-									$Interests[$key] = $y;
+									if($key != "IDUser")
+									{
+										$Interests[$key] = $key;
+									}
 								}
 							}
 						}
@@ -268,34 +407,21 @@ class MapController extends Controller
 					}
 				}				
 			}
-			
 			$save['Interests'] = $string;
 			$save['HuntedStoreIdList'] = $HuntedStoreIdList;
 
-			array_push($UserData, $save);
+			$UserData = $save;
 			
-			$pickUser = array("InterfaceId" => 14, "CurrentUser" => $array["CurrentUser"], "UserData" => $UserData);
-									
-			$SuccessToken = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $pickUser);
-			
-			if ($SuccessToken == false)
-			{
-				return "Fail to send information to server. Please try again later";
-			};
-			
-			//AFTER SENDING ALL THE NEED INFO, REQUEST A GET TO RECEIVE THE NECESSARY RECOMMENDATION!!!
-			
-			$response = Http::get('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation');
-
-			if ($response->ok()) 
-			{
-			  return $response;
-			} 
-			else 
-			{
-			  return ("Recommendation not possible for error of the system, please try again later :)");
-			}
-			break;
+			$pickUser = array("InterfaceId" => 14, "CurrentUser" => $name, "UserData" => $UserData);
+			return $pickUser;
+		}
+		else if (count($this->_dbSelect) == 0)
+		{
+			return json_decode('{"ERROR": "User not Found!"}');
+		}
+		else
+		{
+			return json_decode('{"ERROR": "Multipel users Found!"}');
 		}
 	}
 }

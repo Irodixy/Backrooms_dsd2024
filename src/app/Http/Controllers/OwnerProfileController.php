@@ -195,7 +195,7 @@ class OwnerProfileController extends Controller
 										WHERE username = ?', 
 										[$array["UserName"]]);
 																	
-		if(!$this->_dbSelect)
+		if(count($this->_dbSelect) == 0)
 		{
 			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
 											values (?, ?, ?)', 
@@ -203,7 +203,7 @@ class OwnerProfileController extends Controller
 											
 			if($this->_dbInsert == 1)
 			{
-				$check = DB::select('"SELECT ID 
+				$check = DB::select('SELECT ID 
 									FROM users 
 									WHERE username = ?', 
 									[$array["UserName"]]);
@@ -226,16 +226,16 @@ class OwnerProfileController extends Controller
 											
 					if($anotherTemporay == 1)
 					{
-						$anotherCheck = DB::select('"SELECT ID 
-											FROM store
-											WHERE IDOwner = ?
-											AND name = ?', 
-											[$UserId, $$array["StoreName"]]);
+						$anotherCheck = DB::select('SELECT ID 
+													FROM store
+													WHERE IDOwner = ?
+													AND name = ?', 
+													[$UserId, $array["StoreName"]]);
 											
 						if(count($anotherCheck) == 1)
 						{
 							$StoreId = "";
-							foreach($check as $Objs)
+							foreach($anotherCheck as $Objs)
 							{
 								//Here we separete each result from DB in their diferent keys and values
 								foreach($Objs as $keys => $x)
@@ -256,10 +256,10 @@ class OwnerProfileController extends Controller
 													$array["StoreLocation"]["number"], $array["StoreLocation"]["floor"], $array["StoreLocation"]["zipcode"]]); */
 													//THIS IS FULL INSERT OF LOCATION, BUT FOR NOW IS NOT IN USE
 													
-							$location = DB::insert('INSERT into location 
+							$location = DB::insert('INSERT INTO location 
 													(IDStore, latitude, longitude, floor) 
 													VALUES (?, ?, ?, ?)', 
-													[$StoreId, $$values_array [0], $$values_array [1], $array["StoreFloor"]]);
+													[$StoreId, $values_array[0], $values_array[1], $array["StoreFloor"]]);
 											
 							if($location == 1)
 							{
