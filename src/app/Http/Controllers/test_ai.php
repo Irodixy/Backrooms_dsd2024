@@ -32,7 +32,7 @@ class test_ai extends Controller
 		$pickStores = $save->json();
 		$pickStores["InterfaceId"] = 13; 
 			
-		$save = Http::post('https://u10536-9aae-47f62ca6.neimeng.seetacloud.com:6443/require_recommendation', $pickStores);
+		$save = Http::post('https://u69070-9b28-34756fc5.westb.seetacloud.com:8443/require_recommendation', $pickStores);
 		$SuccessToken = $save->json();
 		if(count($SuccessToken) > 0
 		{
