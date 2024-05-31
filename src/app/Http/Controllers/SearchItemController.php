@@ -68,7 +68,7 @@ class SearchItemController extends Controller
 		}
 		else
 		{
-			$ItemList = json_decode('{"ERROR": "No item found!"}');
+			$ItemList = array(); //json_decode('{"ERROR": "No item found!"}');
 		}
 		
 		$this->_newArray = array("InterfaceId" => 6, "CurrentUser" => $input["CurrentUser"], "ItemList" => $ItemList);

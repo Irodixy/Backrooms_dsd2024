@@ -16,24 +16,31 @@ class OwnerProfileController extends Controller
 	function UpdateOrInsert (Request $array)
 	{
 		$input = $array->all();
-		$this->_dbSelect = DB::select('SELECT ID
-										FROM users 
-										WHERE ID = ?', 
-										[$input["UserId"]]);
+		
+		if(array_key_exists("UserId", $input))
+		{
+			$this->_dbSelect = DB::select('SELECT ID
+											FROM users 
+											WHERE ID = ?', 
+											[$input["UserId"]]);
 
-		if(count($this->_dbSelect) == 1)
-		{
-			return $this->UpdateOwner($input);
-		}
-		else if(count($this->_dbSelect) == 0)
-		{
-			return $this->InsertOwner($input);
+			if(count($this->_dbSelect) == 1)
+			{
+				return $this->UpdateOwner($input);
+			}
+			else if(count($this->_dbSelect) == 0)
+			{
+				return $this->InsertOwner($input);
+			}
+			else
+			{
+				return json_decode('{"ERROR": "Something went wrong, please try again later"}');
+			}
 		}
 		else
 		{
-			return json_decode('{"ERROR": "Something went wrong, please try again later"}');
+			return json_decode('{"ERROR": "UserId needed, but not exist. Contact Admin!"}');
 		}
-		
 	}
 	
     function SeeOwner(Request $array)
@@ -256,9 +263,9 @@ class OwnerProfileController extends Controller
 					}
 				}
 			}
-			print_r($values);
-			echo $string;
-			/*$this->_dbUpdate = DB::update($string, $values);
+			//print_r($values);
+			//echo $string;
+			$this->_dbUpdate = DB::update($string, $values);
 			
 			if($this->_dbUpdate >= 1)
 			{
@@ -269,7 +276,7 @@ class OwnerProfileController extends Controller
 			{
 				$SuccessToken = false;
 				$newArray = array("SuccessToken" => $SuccessToken);
-			}*/
+			}
 		}
 		else
 		{

@@ -102,7 +102,7 @@ class MapController extends Controller
 						}
 						else
 						{
-							$items = json_decode('{"ERROR": "items not found"}');
+							$items = array(); //json_decode('{"ERROR": "items not found"}');
 						}
 					}
 					else if($key === "storeName")
@@ -406,7 +406,7 @@ class MapController extends Controller
 						}
 						else
 						{
-							$HuntedStoreIdList = array("ERROR, item not found");
+							$HuntedStoreIdList = array(); //array("ERROR, item not found");
 						}
 					}
 					else 

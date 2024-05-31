@@ -83,7 +83,7 @@ class ItemController extends Controller
 		}
 		else
 		{
-			$this->_newArray = json_decode('{"ERROR": "items not found"}');
+			$this->_newArray = array("ItemData" => array()); //json_decode('{"ERROR": "items not found"}');
 		}
 		
 		return $newArray = $this->_newArray;									

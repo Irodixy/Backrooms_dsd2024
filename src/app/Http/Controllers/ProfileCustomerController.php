@@ -139,7 +139,30 @@ class ProfileCustomerController extends Controller
 										
 										if($countAgain == $number)
 										{
-											DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
+											$FirstPart = <<<EOT
+															SELECT COUNT(*) INTO @column_exists
+															FROM information_schema.COLUMNS
+															WHERE TABLE_SCHEMA = 'project'
+															AND TABLE_NAME = 'interests'
+															AND COLUMN_NAME = '
+															EOT;
+											$SecondPart = <<<EOT
+															';
+
+															-- Conditionally add the column
+															SET @query = IF(@column_exists = 0,
+																'ALTER TABLE interests ADD COLUMN 
+															EOT;
+											$ThirdPart = <<<EOT
+															INTEGER(5) DEFAULT 0;',
+																'SELECT "Column already exists";');
+
+															PREPARE stmt FROM @query;
+															EXECUTE stmt;
+															DEALLOCATE PREPARE stmt;
+															EOT;
+											
+											DB::statement($FirstPart . $y . $SecondPart . $y . $ThirdPart);
 											$changeInterests[$y] = mt_rand(1, 100);
 										}
 									}

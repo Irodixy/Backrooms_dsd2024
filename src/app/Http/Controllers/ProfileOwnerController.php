@@ -15,6 +15,7 @@ class ProfileOwnerController extends Controller
 	function UpdateOrInsert (Request $array)
 	{
 		$input = $array->all();
+		
 		$this->_dbSelect = DB::select('SELECT s.ID
 										FROM users u, store s
 										WHERE u.username = ?

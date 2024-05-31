@@ -98,7 +98,7 @@ class SearchStore extends Controller
 							}
 							else
 							{
-								$items = json_decode('{"ERROR": "item not found!"}');
+								$items = array(); //json_decode('{"ERROR": "item not found!"}');
 							}
 						}
 						else if($key === "storeName")
