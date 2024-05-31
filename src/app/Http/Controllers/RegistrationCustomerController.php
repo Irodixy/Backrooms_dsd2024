@@ -63,7 +63,8 @@ class RegistrationCustomerController extends Controller
 				}
 				else
 				{
-					$this->_newArray = json_decode('{"ERROR": "Registration successful but Username not found! Contact Admin!"}');
+					$SuccessToken = false;
+					$this->_newArray = array("successful_token" => $SuccessToken, "ERROR" => "Registration successful but Username not found! Contact Admin!");
 				}
 			}
 			else
@@ -74,7 +75,8 @@ class RegistrationCustomerController extends Controller
 		}
 		else
 		{
-			$this->_newArray = json_decode('{"ERROR": "username already exists"}');
+			$SuccessToken = false;
+			$this->_newArray = array("successful_token" => $SuccessToken, "ERROR" => "username already exists");
 		}
 		return $newArray = $this->_newArray;
 	}
