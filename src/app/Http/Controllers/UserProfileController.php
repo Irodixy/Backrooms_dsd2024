@@ -195,21 +195,29 @@ class UserProfileController extends Controller
 					foreach($liteInterests as $Objs)
 					{
 						$values_array = array_map("strtolower", explode(',', $array["Interests"]));
+
+						//number of Interests to update!!!
 						$number = count($values_array);
 						
 						$i = 0;
 						$save =[];
 						
+						//counts how many interests to update already exist on DB
 						$count = 0;
 						$changeInterests = [];
 						
-						//Here we separete each result from DB in their diferent keys and values
+						$countDBInterests = 0;
+						
+						//Each round is a new INTERESTS of DB
 						foreach($Objs as $key => $x)
 						{
 							if($key != "IDUser")
 							{
+								//count the amount of interests columns in DB
+								$countDBInterests++;
 								foreach($values_array as $keys => $y)
 								{
+									//if one interest of DB is equal to another to update!
 									if($key == $y)
 									{
 										$count++;
@@ -219,19 +227,20 @@ class UserProfileController extends Controller
 							}
 						}						
 						
+						//if count = number, them the interests to update are all already in DB
 						if($count == $number)
 						{
 							$array["Interests"] = [];
 							$array["Interests"] = $changeInterests;
 						}
-						else if($count < $number)
+						else if($count < $number) //else it means one or more are not in DB, and need to be added!
 						{
-							//this one connects with the table Interests from DB
-							foreach($Objs as $key => $x)
+							//this one connects with the values coming from frontend
+							foreach($values_array as $keys => $y)
 							{
 								$countAgain = 0;
-								//this one connects with the values coming from frontend
-								foreach($values_array as $keys => $y)
+								//this one connects with the table Interests from DB
+								foreach($Objs as $key => $x)
 								{
 									if($key != "IDUser")
 									{
@@ -241,9 +250,34 @@ class UserProfileController extends Controller
 											$countAgain++;
 										}
 										
-										if($countAgain == $number)
+										if($countAgain == $countDBInterests)
 										{
-											DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
+											$FirstPart = <<<EOT
+															SELECT COUNT(*) INTO @column_exists
+															FROM information_schema.COLUMNS
+															WHERE TABLE_SCHEMA = 'project'
+															AND TABLE_NAME = 'interests'
+															AND COLUMN_NAME = '
+															EOT;
+											$SecondPart = <<<EOT
+															';
+															SET @query = IF(@column_exists = 0, 'ALTER TABLE interests ADD COLUMN 
+															EOT;
+											$ThirdPart = <<<EOT
+															 INTEGER(5) DEFAULT 0 ;',
+																'SELECT "Column already exists";');
+
+															PREPARE stmt FROM @query;
+															EXECUTE stmt;
+															DEALLOCATE PREPARE stmt;
+															EOT;
+														
+											$string = $FirstPart . $y . $SecondPart . $y . $ThirdPart;
+											//echo $string;											
+											DB::unprepared($string);
+											
+											$constrain = "ALTER TABLE interests ADD CONSTRAINT chk_" . $y . " CHECK (". $y . " BETWEEN 0 AND 100);";
+											DB::unprepared($constrain);
 											$changeInterests[$y] = mt_rand(1, 100);
 										}
 									}
@@ -251,17 +285,16 @@ class UserProfileController extends Controller
 							}
 							$array["Interests"] = [];
 							$array["Interests"] = $changeInterests;
-							
 						}
 					}
 				}
 				else if(count($liteInterests) == 0)
 				{
-					$this->_newArray = json_decode('{"ERROR": "Interests not found, contact the admin!"}');
+					return json_decode('{"ERROR": "Interests not found, contact the admin!"}');
 				}
 				else
 				{
-					$this->_newArray = json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
+					return json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
 				}
 			}
 			
