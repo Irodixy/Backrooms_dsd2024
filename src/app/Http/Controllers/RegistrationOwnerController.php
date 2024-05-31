@@ -16,6 +16,10 @@ class RegistrationOwnerController extends Controller
 		$MatchToken = "";
 		
 		$input = $array->all();
+		if($input["UserPassword"])
+		{
+			$input["UserPassword"] = password_hash($input["UserPassword"], PASSWORD_DEFAULT);
+		}
 		
 		$this->_dbSelect = DB::select('SELECT username
 									FROM users

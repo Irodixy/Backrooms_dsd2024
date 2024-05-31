@@ -14,6 +14,11 @@ class RegistrationCustomerController extends Controller
     function RegistrationCustomer(Request $array)
 	{
 		$input = $array->all();
+		if($input["PassWord"])
+		{
+			$input["PassWord"] = password_hash($input["PassWord"], PASSWORD_DEFAULT);
+		}
+		
 		
 		$SuccessToken = "";
 		$this->_dbSelect = DB::select('SELECT username

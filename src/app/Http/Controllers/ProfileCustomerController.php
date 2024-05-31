@@ -14,26 +14,161 @@ class ProfileCustomerController extends Controller
     function UpdateProfile (Request $array)
 	{
 		$input = $array->all();
+		if(array_key_exists("PassWord", $input))
+		{
+			$input["PassWord"] = password_hash($input["PassWord"], PASSWORD_DEFAULT);
+		}
 		
 		$SuccessToken = "";
 		
-		$temporary = DB::select('SELECT ID
+		$temporary = DB::select('SELECT ID AS UserId
 								FROM users 
-								WHERE username = ?', 
+								WHERE username = ?
+								AND type = "customer"', 
 								[$input["CurrentUser"]]);
 																			 
 
 		if (count($temporary) == 1)
-		{			
-			$query = new QueryBuilderController();
-			$string = $query -> StringBuilder("UPDATE", $input["InterfaceId"], $input);
-			foreach ( $temporary as $x)
+		{
+			$input["UserId"] = $temporary[0]->UserId;
+			
+			if(array_key_exists("UserName", $input))
 			{
-				foreach ($x as $y)
+				$username = DB::select('SELECT ID
+									FROM users
+									WHERE username = ?',
+									[$input["UserName"]]);
+									
+				if(count($username) == 1)
 				{
-					$values = $query -> ArrayBuilder("UPDATE", $input["InterfaceId"], $y, $input);
+					foreach($username as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($input["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Username already been used by other account"}');
+							}	
+						}
+					}
 				}
 			}
+			
+			if(array_key_exists("Email", $input))
+			{
+				$email = DB::select('SELECT ID
+									FROM users
+									WHERE email = ?',
+									[$input["Email"]]);
+									
+				if(count($email) == 1)
+				{
+					foreach($email as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($input["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Email already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
+			if(array_key_exists("Interests", $input))
+			{
+				//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+				$liteInterests = DB::select('SELECT *
+											FROM interests
+											WHERE IDUser = ?', 
+											[$input["UserId"]]);
+									
+				if(count($liteInterests) == 1)
+				{				
+					foreach($liteInterests as $Objs)
+					{
+						$values_array = array_map("strtolower", explode(',', $input["Interests"]));
+						$number = count($values_array);
+						
+						$i = 0;
+						$save =[];
+						
+						$count = 0;
+						$changeInterests = [];
+						
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Objs as $key => $x)
+						{
+							if($key != "IDUser")
+							{
+								foreach($values_array as $keys => $y)
+								{
+									if($key == $y)
+									{
+										$count++;
+										$changeInterests[$y] = mt_rand(1, 100);
+									}
+								}
+							}
+						}						
+						
+						if($count == $number)
+						{
+							$input["Interests"] = [];
+							$input["Interests"] = $changeInterests;
+						}
+						else if($count < $number)
+						{
+							//this one connects with the table Interests from DB
+							foreach($Objs as $key => $x)
+							{
+								$countAgain = 0;
+								//this one connects with the values coming from frontend
+								foreach($values_array as $keys => $y)
+								{
+									if($key != "IDUser")
+									{
+										//this one calculates if interest is different from all the ones already in DB
+										if($key != $y)
+										{
+											$countAgain++;
+										}
+										
+										if($countAgain == $number)
+										{
+											DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
+											$changeInterests[$y] = mt_rand(1, 100);
+										}
+									}
+								}
+							}
+							$input["Interests"] = [];
+							$input["Interests"] = $changeInterests;
+							
+						}
+					}
+				}
+				else if(count($liteInterests) == 0)
+				{
+					return json_decode('{"ERROR": "Interests not found, contact the admin!"}');
+				}
+				else
+				{
+					return json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
+				}	
+			}
+
+			$query = new QueryBuilderController();
+			$string = $query -> StringBuilder("UPDATE", $input["InterfaceId"], $input);
+			$values = $query -> ArrayBuilder("UPDATE", $input["InterfaceId"], $input["UserId"], $input);
+			if(is_string($values))
+			{
+				return json_decode($values);
+			}
+			
 			//print_r($values);
 			//echo $string;
 			
@@ -49,6 +184,7 @@ class ProfileCustomerController extends Controller
 				$SuccessToken = false;
 				$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], "SuccessToken" => $SuccessToken);
 			}
+			
 		}
 		else
 		{

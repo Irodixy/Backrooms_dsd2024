@@ -175,10 +175,14 @@ class ItemController extends Controller
 				foreach ($x as $y)
 				{
 					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+					if(is_string($values))
+					{
+						return json_decode($values);
+					}
 				}
 			}
-			/*print_r($values);
-			echo($string);*/
+			//print_r($values);
+			//echo($string);
 			$this->_dbUpdate = DB::update($string, $values);
 			
 			if($this->_dbUpdate >= 1)

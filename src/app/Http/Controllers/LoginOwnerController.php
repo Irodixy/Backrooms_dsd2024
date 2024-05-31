@@ -13,15 +13,17 @@ class LoginOwnerController extends Controller
      function LoginOwner(Request $array)
 	{
 		$input = $array->all();
-		
 		$MatchToken = "";
 		
-		$this->_dbSelect = DB::select('SELECT ID, username 
-												FROM users 
-												WHERE username = ? and password = ?', 
-												[$input["UserName"], $input["UserPassword"]]);
-				
-		if(count($this->_dbSelect) == 1)
+		//VERIFY PASSWORD!!!!
+		$StoredPass = DB::select('SELECT password
+								FROM users
+								WHERE username = ?',
+								[$input["UserName"]]);
+						
+		$password = $StoredPass[0]->password;
+
+		if(password_verify($input["UserPassword"], $password))
 		{
 			$MatchToken = true;
 			$this->_newArray = array("MatchToken" => $MatchToken);
@@ -31,7 +33,6 @@ class LoginOwnerController extends Controller
 			$MatchToken = false;
 			$this->_newArray = array("MatchToken" => $MatchToken);
 		}
-		
 		return $newArray = $this->_newArray;
 	}
 }

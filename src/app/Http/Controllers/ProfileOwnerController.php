@@ -128,6 +128,12 @@ class ProfileOwnerController extends Controller
     function UpdateStore($array)
 	{
 		$SuccessToken = "";
+		
+		if(array_key_exists("UserPassword", $array))
+		{
+			$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
+		}
+		
 		$this->_dbSelect = DB::select('SELECT ID
 									FROM users 
 									WHERE username = ?', 
@@ -145,41 +151,68 @@ class ProfileOwnerController extends Controller
 			{
 				foreach ($x as $y)
 				{
-					$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-													FROM store s, location l, users u
-													WHERE s.ID = l.IDStore
-													AND s.IDOwner = u.ID 
-													AND u.ID = ?', 
-													[$y]);
-													
-					/*$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
-													FROM store s, location l
-													WHERE s.ID = l.IDStore
-													AND s.ID = ?', 
-													[$y]);*/ //THIS IS FOR WHEN OWNER CAN HAVE MORE THEN ONE STORE!!!!!!!!!
-													
-					foreach($temporary as $Objs)
+					$array["UserId"] = $y;
+					if(array_key_exists("StoreLocation", $array) OR array_key_exists("StoreFloor", $array))
 					{
-						$values_array = explode(',', $array["StoreLocation"]);
-						$save =[];
-						//Here we separete each result from DB in their diferent keys and values
-						foreach($Objs as $key => $z)
+						$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+														FROM store s, location l, users u
+														WHERE s.ID = l.IDStore
+														AND s.IDOwner = u.ID 
+														AND u.ID = ?', 
+														[$y]);
+														
+						/*$temporary = DB::select('SELECT l.latitude, l.longitude, l.country, l.state, l.city, l.street, l.number, l.floor, l.zipcode
+														FROM store s, location l
+														WHERE s.ID = l.IDStore
+														AND s.ID = ?', 
+														[$y]);*/ //THIS IS FOR WHEN OWNER CAN HAVE MORE THEN ONE STORE!!!!!!!!!
+														
+						foreach($temporary as $Objs)
 						{
-							if ($key == "latitude")
+							$values_array = explode(',', $array["StoreLocation"]);
+							$save =[];
+							//Here we separete each result from DB in their diferent keys and values
+							foreach($Objs as $key => $z)
 							{
-								$save[$key] = $values_array[0];
+								if ($key == "latitude")
+								{
+									$save[$key] = $values_array[0];
+								}
+								else if ($key == "longitude")
+								{
+									$save[$key] = $values_array[1];
+								}
+								else if ($key == "floor")
+								{
+									$save[$key] = $array["StoreFloor"];
+								}
 							}
-							else if ($key == "longitude")
-							{
-								$save[$key] = $values_array[1];
-							}
-							else if ($key == "floor")
-							{
-								$save[$key] = $array["StoreFloor"];
-							}
+							unset($array["StoreFloor"]);
+							$array["StoreLocation"] = $save;
 						}
-						unset($array["StoreFloor"]);
-						$array["StoreLocation"] = $save;
+					}
+				}
+			}
+			
+			if(array_key_exists("StoreName", $array))
+			{
+				$storename = DB::select('SELECT IDOwner
+									FROM store
+									WHERE name = ?',
+									[$array["StoreName"]]);
+									
+				if(count($storename) == 1)
+				{
+					foreach($storename as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Username already been used by other account"}');
+							}	
+						}
 					}
 				}
 			}
@@ -193,6 +226,10 @@ class ProfileOwnerController extends Controller
 				foreach ($x as $y)
 				{
 					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+					if(is_string($values))
+					{
+						return json_decode($values);
+					}
 				}
 			}
 			

@@ -117,6 +117,11 @@ class UserProfileController extends Controller
 	
 	function UpdateUser ($array)
 	{
+		if(array_key_exists("UserPassword", $array))
+		{
+			$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
+		}
+		
 		$temporary = DB::select('SELECT ID
 								FROM users 
 								WHERE ID = ?
@@ -125,6 +130,29 @@ class UserProfileController extends Controller
 
 		if(count($temporary) == 1)
 		{
+			if(array_key_exists("UserName", $array))
+			{
+				$username = DB::select('SELECT ID
+									FROM users
+									WHERE username = ?',
+									[$array["UserName"]]);
+									
+				if(count($username) == 1)
+				{
+					foreach($username as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Username already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
 			if(array_key_exists("Email", $array))
 			{
 				$email = DB::select('SELECT ID
@@ -148,109 +176,111 @@ class UserProfileController extends Controller
 				}
 			}
 			
-			
-			//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
-			$liteInterests = DB::select('SELECT *
-										FROM interests
-										WHERE IDUser = ?', 
-										[$array["UserId"]]);
-								
-			if(count($liteInterests) == 1)
-			{				
-				foreach($liteInterests as $Objs)
-				{
-					$values_array = array_map("strtolower", explode(',', $array["Interests"]));
-					$number = count($values_array);
-					
-					$i = 0;
-					$save =[];
-					
-					$count = 0;
-					$changeInterests = [];
-					
-					//Here we separete each result from DB in their diferent keys and values
-					foreach($Objs as $key => $x)
+			if(array_key_exists("Interests", $array))
+			{
+				//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
+				$liteInterests = DB::select('SELECT *
+											FROM interests
+											WHERE IDUser = ?', 
+											[$array["UserId"]]);
+									
+				if(count($liteInterests) == 1)
+				{				
+					foreach($liteInterests as $Objs)
 					{
-						if($key != "IDUser")
-						{
-							foreach($values_array as $keys => $y)
-							{
-								if($key == $y)
-								{
-									$count++;
-									$changeInterests[$y] = mt_rand(1, 100);
-								}
-							}
-						}
-					}						
-					
-					if($count == $number)
-					{
-						$array["Interests"] = [];
-						$array["Interests"] = $changeInterests;
-					}
-					else if($count < $number)
-					{
-						//this one connects with the table Interests from DB
+						$values_array = array_map("strtolower", explode(',', $array["Interests"]));
+						$number = count($values_array);
+						
+						$i = 0;
+						$save =[];
+						
+						$count = 0;
+						$changeInterests = [];
+						
+						//Here we separete each result from DB in their diferent keys and values
 						foreach($Objs as $key => $x)
 						{
-							$countAgain = 0;
-							//this one connects with the values coming from frontend
-							foreach($values_array as $keys => $y)
+							if($key != "IDUser")
 							{
-								if($key != "IDUser")
+								foreach($values_array as $keys => $y)
 								{
-									//this one calculates if interest is different from all the ones already in DB
-									if($key != $y)
+									if($key == $y)
 									{
-										$countAgain++;
-									}
-									
-									if($countAgain == $number)
-									{
-										DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
+										$count++;
 										$changeInterests[$y] = mt_rand(1, 100);
 									}
 								}
 							}
-						}
-						$array["Interests"] = [];
-						$array["Interests"] = $changeInterests;
+						}						
 						
+						if($count == $number)
+						{
+							$array["Interests"] = [];
+							$array["Interests"] = $changeInterests;
+						}
+						else if($count < $number)
+						{
+							//this one connects with the table Interests from DB
+							foreach($Objs as $key => $x)
+							{
+								$countAgain = 0;
+								//this one connects with the values coming from frontend
+								foreach($values_array as $keys => $y)
+								{
+									if($key != "IDUser")
+									{
+										//this one calculates if interest is different from all the ones already in DB
+										if($key != $y)
+										{
+											$countAgain++;
+										}
+										
+										if($countAgain == $number)
+										{
+											DB::statement('ALTER TABLE interests ADD IF NOT EXISTS ' . $y . ' INTEGER(5) DEFAULT 0');
+											$changeInterests[$y] = mt_rand(1, 100);
+										}
+									}
+								}
+							}
+							$array["Interests"] = [];
+							$array["Interests"] = $changeInterests;
+							
+						}
 					}
 				}
-
-				$ID = 21;
-				$query = new QueryBuilderController();
-				$string = $query -> StringBuilder("UPDATE", $ID, $array);
-				foreach ( $temporary as $x)
+				else if(count($liteInterests) == 0)
 				{
-					foreach ($x as $y)
-					{
-						$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
-					}
-				}
-				
-				$this->_dbUpdate = DB::update($string, $values);
-				
-				if($this->_dbUpdate >= 1)
-				{
-					$SuccessToken = true;
-					$this->_newArray = array("SuccessToken" => $SuccessToken);
+					$this->_newArray = json_decode('{"ERROR": "Interests not found, contact the admin!"}');
 				}
 				else
 				{
-					$SuccessToken = false;
-					$this->_newArray = array("SuccessToken" => $SuccessToken);
+					$this->_newArray = json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
 				}
 			}
-			else if(count($liteInterests) == 0)
+			
+			$ID = 21;
+			$query = new QueryBuilderController();
+			$string = $query -> StringBuilder("UPDATE", $ID, $array);
+			foreach ( $temporary as $x)
 			{
-				$this->_newArray = json_decode('{"ERROR": "Interests not found, contact the admin!"}');
+				foreach ($x as $y)
+				{
+					$values = $query -> ArrayBuilder("UPDATE", $ID, $y, $array);
+				}
+			}
+			
+			$this->_dbUpdate = DB::update($string, $values);
+			
+			if($this->_dbUpdate >= 1)
+			{
+				$SuccessToken = true;
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 			else
 			{
-				$this->_newArray = json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
+				$SuccessToken = false;
+				$this->_newArray = array("SuccessToken" => $SuccessToken);
 			}
 		}
 		else
@@ -263,6 +293,11 @@ class UserProfileController extends Controller
 	
 	function InsertUser ($array)
 	{
+		if(array_key_exists("UserPassword", $array))
+		{
+			$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
+		}
+		
 		$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password, birthday) 
 							values (?, ?, ?, ?)', 
 							[$array["UserId"] , $array["UserName"], $array["UserPassword"], $array["Birthday"]]);

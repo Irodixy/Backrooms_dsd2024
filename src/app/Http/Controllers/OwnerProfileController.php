@@ -139,21 +139,108 @@ class OwnerProfileController extends Controller
 	
 	function UpdateOwner ($array)
 	{
+		if(array_key_exists("UserPassword", $array))
+		{
+			$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
+		}
+		
 		$temporary = DB::select('SELECT username
 								FROM users 
 								WHERE ID = ?', 
 								[$array["UserId"]]);
 								
 		//ADAPT THE VALUES OF OTHER GROUPS TO BE USE BY MY CODE!!!!
-		$values_array = explode(',', $array["StoreLocation"]);
-		$array["StoreLocation"] =[];
-		$array["StoreLocation"]["latitude"] = $values_array[0];
-		$array["StoreLocation"]["longitude"] = $values_array[1];
-		$array["StoreLocation"]["floor"] = $array["StoreFloor"];
-		unset($array["StoreFloor"]);
+		if(array_key_exists("StoreLocation", $array) OR array_key_exists("StoreFloor", $array))
+		{
+			$values_array = explode(',', $array["StoreLocation"]);
+			$array["StoreLocation"] =[];
+			if(array_key_exists("StoreLocation", $array))
+			{
+				$array["StoreLocation"]["latitude"] = $values_array[0];
+				$array["StoreLocation"]["longitude"] = $values_array[1];
+			}
+			
+			if(array_key_exists("StoreFloor", $array))
+			{
+				$array["StoreLocation"]["floor"] = $array["StoreFloor"];
+				unset($array["StoreFloor"]);
+			}
+		}						
+	
+		
+		
 
 		if (count($temporary) == 1)
 		{
+			if(array_key_exists("UserName", $array))
+			{
+				$username = DB::select('SELECT ID
+									FROM users
+									WHERE username = ?',
+									[$array["UserName"]]);
+									
+				if(count($username) == 1)
+				{
+					foreach($username as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Username already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
+			if(array_key_exists("Email", $array))
+			{
+				$email = DB::select('SELECT ID
+									FROM users
+									WHERE email = ?',
+									[$array["Email"]]);
+									
+				if(count($email) == 1)
+				{
+					foreach($email as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Email already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
+			if(array_key_exists("StoreName", $array))
+			{
+				$storename = DB::select('SELECT IDOwner
+									FROM store
+									WHERE name = ?',
+									[$array["StoreName"]]);
+									
+				if(count($storename) == 1)
+				{
+					foreach($storename as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Username already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
 			$ID = 24;
 			
 			$query = new QueryBuilderController();
@@ -163,10 +250,15 @@ class OwnerProfileController extends Controller
 				foreach ($x as $y)
 				{
 					$values = $query -> ArrayBuilder("UPDATE", $ID, $array["UserId"], $array);
+					if(is_string($values))
+					{
+						return json_decode($values);
+					}
 				}
 			}
-
-			$this->_dbUpdate = DB::update($string, $values);
+			print_r($values);
+			echo $string;
+			/*$this->_dbUpdate = DB::update($string, $values);
 			
 			if($this->_dbUpdate >= 1)
 			{
@@ -177,7 +269,7 @@ class OwnerProfileController extends Controller
 			{
 				$SuccessToken = false;
 				$newArray = array("SuccessToken" => $SuccessToken);
-			}
+			}*/
 		}
 		else
 		{
@@ -197,6 +289,11 @@ class OwnerProfileController extends Controller
 																	
 		if(count($this->_dbSelect) == 0)
 		{
+			if(array_key_exists("UserPassword", $array))
+			{
+				$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
+			}
+			
 			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
 											values (?, ?, ?)', 
 											[$array["UserName"], $array["UserPassword"], "owner"]);
