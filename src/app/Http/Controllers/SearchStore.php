@@ -30,7 +30,7 @@ class SearchStore extends Controller
 				//Variables to save data and help reorganize the future JSON file			
 				$StoreList = [];
 				$location = [];
-					$items = [];
+					$Items = [];
 					$save = [];
 			if(count($this->_dbSelect) > 0)
 			{				
@@ -54,11 +54,11 @@ class SearchStore extends Controller
 												
 							if(count($temporary) > 0)
 							{						
-								foreach($temporary as $Obj)
+								foreach($temporary as $Objs)
 								{
-									foreach($Obj as $key => $y)
+									foreach($Objs as $keys => $y)
 									{
-										$location[$key] = $y;
+										$location[$keys] = $y;
 									}
 								}
 							}
@@ -75,26 +75,25 @@ class SearchStore extends Controller
 
 							if(count($temporary) > 0)
 							{						
-								foreach($temporary as $Obj)
+								foreach($temporary as $Objs)
 								{
 									$oneItem = [];
-									foreach($Obj as $key => $y)
+									foreach($Objs as $keys => $y)
 									{
-										if($key == "ItemImage")
+										if($keys == "ItemImage")
 										{
-											$oneItem[$key] = base64_encode($y);
+											$oneItem[$keys] = base64_encode($y);
 										}
-										else if($key == "base_image")
+										else if($keys == "base_image")
 										{
 											$oneItem["ItemImage"] = $y . ',' . $oneItem["ItemImage"];
 										}
 										else
 										{
-											$oneItem[$key] = $y;
+											$oneItem[$keys] = $y;
 										}
 									}
-									print_r($oneItem);
-									array_push($items, $oneItem);
+									array_push($Items, $oneItem);
 								}
 							}
 							else
@@ -109,20 +108,20 @@ class SearchStore extends Controller
 						else if($key === "StoreDescription")
 						{
 							$save['location'] = $location;
-							$save['items'] = $items;
+							$save['items'] = $Items;
 							$save[$key] = $x;
 							
 							array_push($StoreList, $save);
 						}
 					}				
 				}
+				$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"], "StoreList" => $StoreList);
+				//$newArray = json_encode($this->_newArray);
 			}
 			else
 			{
 				json_decode('{"ERROR": "No Store found!"}');
 			}
-		$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"] ,"StoreList" => $StoreList);
-		
 		return $newArray = $this->_newArray;
 	}
 }
