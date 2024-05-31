@@ -190,6 +190,7 @@ class ProfileCustomerController extends Controller
 		{
 			$this->_newArray = array("ERROR" => "User not Found!");
 		}
+		
 		return $newArray = $this->_newArray;
 	}
 	

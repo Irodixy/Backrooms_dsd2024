@@ -121,7 +121,7 @@ class SearchStore extends Controller
 			{
 				json_decode('{"ERROR": "No Store found!"}');
 			}
-		$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"] ,"StoreList" => $StoreList);
+		$this->_newArray = json_encode(array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"] ,"StoreList" => $StoreList));
 		
 		//return $newArray = $this->_newArray;
 	}
