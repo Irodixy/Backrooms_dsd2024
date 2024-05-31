@@ -160,7 +160,7 @@ class ProfileCustomerController extends Controller
 															SET @query = IF(@column_exists = 0, 'ALTER TABLE interests ADD COLUMN 
 															EOT;
 											$ThirdPart = <<<EOT
-															 INTEGER(5) DEFAULT 0;',
+															 INTEGER(5) DEFAULT 0 ;',
 																'SELECT "Column already exists";');
 
 															PREPARE stmt FROM @query;
@@ -171,6 +171,9 @@ class ProfileCustomerController extends Controller
 											$string = $FirstPart . $y . $SecondPart . $y . $ThirdPart;
 											//echo $string;											
 											DB::unprepared($string);
+											
+											$constrain = "ALTER TABLE interests ADD CONSTRAINT chk_" . $y . " CHECK (". $y . " BETWEEN 0 AND 100);";
+											DB::unprepared($constrain);
 											$changeInterests[$y] = mt_rand(1, 100);
 										}
 									}
