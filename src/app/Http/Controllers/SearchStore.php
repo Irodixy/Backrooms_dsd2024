@@ -17,6 +17,10 @@ class SearchStore extends Controller
 		$MatchToken = "";
 		$temporary = [];
 		
+		if(!array_key_exists("StoreName", $input))
+		{
+			$input["StoreName"] = "";
+		}
 		//Select info of STORE
 				$this->_dbSelect = DB::select('SELECT s.ID AS storeId, s.name AS storeName, s.type, s.description AS StoreDescription 
 												FROM store s
@@ -28,7 +32,8 @@ class SearchStore extends Controller
 				$location = [];
 					$items = [];
 					$save = [];
-					
+			if(count($this->_dbSelect) > 0)
+			{				
 				//Because an instance is created, we need to separete first the diferent rows that comes from the DB	
 				foreach($this->_dbSelect as $Obj)
 				{
@@ -37,7 +42,7 @@ class SearchStore extends Controller
 					{
 						//store Id is necessary to get more necessary data from DB, so we use an "if"
 						//to use this key value in all other select querys
-						if($key === "storeId")
+						if($key == "storeId")
 						{
 							$save[$key] = $x;
 							
@@ -59,10 +64,10 @@ class SearchStore extends Controller
 							}
 							else
 							{
-								$location = array("ERROR" => "location not found");
+								$location = json_decode('{"ERROR": "location not found"}');
 							}
 
-							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.IDStore AS ItemStoreId, s.name AS ItemStoreName
+							$temporary = DB::select('SELECT i.ID AS ItemId, i.name AS ItemName, i.price AS ItemPrice, i.description AS ItemDescription, i.image AS ItemImage, i.base_image,  i.IDStore AS ItemStoreId, s.name AS ItemStoreName
 												FROM item i, store s
 												WHERE s.ID = ?
 												AND i.IDStore = s.ID', 
@@ -75,14 +80,26 @@ class SearchStore extends Controller
 									$oneItem = [];
 									foreach($Obj as $key => $y)
 									{
-										$oneItem[$key] = $y;
+										if($key == "ItemImage")
+										{
+											$oneItem[$key] = base64_encode($y);
+										}
+										else if($key == "base_image")
+										{
+											$oneItem["ItemImage"] = $y . ',' . $oneItem["ItemImage"];
+										}
+										else
+										{
+											$oneItem[$key] = $y;
+										}
 									}
+									print_r($oneItem);
 									array_push($items, $oneItem);
 								}
 							}
 							else
 							{
-								$items = array("ERROR" => "item not found!");
+								$items = json_decode('{"ERROR": "item not found!"}');
 							}
 						}
 						else if($key === "storeName")
@@ -99,8 +116,13 @@ class SearchStore extends Controller
 						}
 					}				
 				}
+			}
+			else
+			{
+				json_decode('{"ERROR": "No Store found!"}');
+			}
 		$this->_newArray = array("InterfaceId" => $input["InterfaceId"], "CurrentUser" => $input["CurrentUser"] ,"StoreList" => $StoreList);
 		
-		return $newArray = $this->_newArray;
+		//return $newArray = $this->_newArray;
 	}
 }

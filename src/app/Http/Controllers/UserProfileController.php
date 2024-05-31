@@ -17,24 +17,30 @@ class UserProfileController extends Controller
 	{
 		$input = $array->all();
 		
-		$this->_dbSelect = DB::select('SELECT ID
+		if(array_key_exists("UserId", $input))
+		{
+			$this->_dbSelect = DB::select('SELECT ID
 										FROM users 
 										WHERE ID = ?', 
 										[$input["UserId"]]);
 
-		if(count($this->_dbSelect) == 1)
-		{
-			return $this->UpdateUser($input);
-		}
-		else if(count($this->_dbSelect) == 0)
-		{
-			return $this->InsertUser($input);
+			if(count($this->_dbSelect) == 1)
+			{
+				return $this->UpdateUser($input);
+			}
+			else if(count($this->_dbSelect) == 0)
+			{
+				return $this->InsertUser($input);
+			}
+			else
+			{
+				return json_decode('{"ERROR": "Something went wrong, please try again later"}');
+			}
 		}
 		else
 		{
-			return json_decode('{"ERROR": "Something went wrong, please try again later"}');
+			return json_decode('{"ERROR": "UserId needed, but not exist. Contact Admin!"}');
 		}
-		
 	}
 	
     function SeeUser(Request $array)
