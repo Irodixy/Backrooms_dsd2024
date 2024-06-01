@@ -55,7 +55,8 @@ class OwnerProfileController extends Controller
 		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, s.ID, s.name AS StoreName
 									FROM users u, store s
 									WHERE s.IDOwner = u.ID
-									AND u.username LIKE ?',
+									AND u.username LIKE ?
+									AND u.type = "owner"',
 									['%' . $input["OwnerName"] . '%']);
 
 		$StoreData = [];
