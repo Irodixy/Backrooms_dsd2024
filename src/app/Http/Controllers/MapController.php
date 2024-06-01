@@ -129,6 +129,8 @@ class MapController extends Controller
 				//WILL BE SAVED IN SOME VARIABLE OR SAME PROPERTY, AND THEN ALL CODE IS NORMAL FROM HERE!
 				// WILL BE NECESSARY OPTIMIZATION OF THE CODE!!! VERY REPETIVE!!
 				
+				$input["RequestType"] = 1; // change so it can go to request 1 and get stores 5km or X distance from target!!
+				
 				$againInterface7 = json_decode('{
 				"InterfaceId": 7,
 				"CurrentUser": "' . $input["CurrentUser"] . '",
@@ -139,8 +141,8 @@ class MapController extends Controller
 				},
 				"RequestType": 1
 				}');
-				
-				$save = Http::post('http://13.79.99.190/api/interface7', $againInterface7);
+				$save = Http::post('http://13.79.99.190/api/interface7', $input);
+				//$save = Http::post('http://13.79.99.190/api/interface7', $againInterface7);
 				$interface13 = $save->json();
 				$interface13["InterfaceId"] = 13;
 				
