@@ -315,9 +315,9 @@ class OwnerProfileController extends Controller
 				$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
 			}
 			
-			$this->_dbInsert = DB::insert('INSERT into users (username, password, type) 
-											values (?, ?, ?)', 
-											[$array["UserName"], $array["UserPassword"], "owner"]);
+			$this->_dbInsert = DB::insert('INSERT into users (ID, username, password, type) 
+											values (?, ?, ?, ?)', 
+											[$array["UserId"], $array["UserName"], $array["UserPassword"], "owner"]);
 											
 			if($this->_dbInsert == 1)
 			{
