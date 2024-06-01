@@ -19,8 +19,17 @@ class LoginCustomerController extends Controller
 								FROM users
 								WHERE username = ?',
 								[$input["UserName"]]);
+		
+		$password = "";
+		foreach($StoredPass as $Obj)
+		{
+			foreach($Obj as $key => $x)
+			{
+				$password = $x;
+			}
+		}			
 						
-		$password = $StoredPass[0]->password;
+		//$password = $StoredPass[0]->password;
 
 		if(password_verify($input["PassWord"], $password))
 		{

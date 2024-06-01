@@ -334,10 +334,16 @@ class MapController extends Controller
 	
 	function interface14 ($name)
 	{
-		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
+		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail, i.interests AS Interests
+											FROM users u, interestsV2 i
+											WHERE u.username = ?
+											AND u.ID = i.IDUser', 
+											[$name]);
+		
+		/*$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.email AS UserEmail 
 											FROM users u
 											WHERE u.username = ?', 
-											[$name]);
+											[$name]);*/
 
 		//Variables to save data and help reorganize the future JSON file			
 		$UserData = [];
@@ -360,6 +366,7 @@ class MapController extends Controller
 					{
 						$save[$key] = $x;
 						
+						/*
 						$temporary = DB::select('SELECT i.*
 											FROM users u, interests i
 											WHERE u.ID = ?
@@ -386,6 +393,7 @@ class MapController extends Controller
 						//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 						$values = array_values($Interests);
 						$string = implode(',', $values);
+						*/
 
 						$temporary = DB::select('SELECT IDStore AS StoreId, date_time AS VisitTime
 											FROM huntedstore
@@ -415,7 +423,8 @@ class MapController extends Controller
 					}
 				}				
 			}
-			$save['Interests'] = $string;
+			
+			//$save['Interests'] = $string;
 			$save['HuntedStoreIdList'] = $HuntedStoreIdList;
 
 			$UserData = $save;

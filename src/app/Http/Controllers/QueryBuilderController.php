@@ -18,7 +18,21 @@ class QueryBuilderController extends Controller
 			if ($id == 10)
 			{
 				unset($array["UserId"]);
+				
 				if(array_key_exists("Interests", $array) AND count($array) >= 4)
+				{
+					$newString = $type . " users u, interestsV2 i SET ";
+				}
+				else if(array_key_exists("Interests", $array) AND count($array) <= 3)
+				{
+					$newString = $type . " interestsV2 i SET ";
+				}
+				else
+				{
+					$newString = $type . " users u SET ";
+				}
+				
+				/*if(array_key_exists("Interests", $array) AND count($array) >= 4)
 				{
 					$newString = $type . " users u, interests i SET ";
 				}
@@ -29,9 +43,22 @@ class QueryBuilderController extends Controller
 				else
 				{
 					$newString = $type . " users u SET ";
-				}
+				}*/
 				
 				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if ($key == "Interests")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "i." . "$add = ?, ";
+					}
+				}
+				/*foreach ($array as $key => $x)
 				{
 					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests")
 					{
@@ -46,8 +73,9 @@ class QueryBuilderController extends Controller
 							$newString = $newString . "i." . "$add = ?, ";
 						}
 					}
-				}
-				$newString = substr($newString, 0, -2);
+				}*/
+				
+				$newString = substr($newString, 0, -2); 
 				
 				if(array_key_exists("Interests", $array) AND count($array) >= 4)
 				{
@@ -67,7 +95,20 @@ class QueryBuilderController extends Controller
 			else if ($id == 21)
 			{
 				unset($array["UserId"]);
+				
 				if(array_key_exists("Interests", $array) AND count($array) >= 4)
+				{
+					$newString = $type . " users u, interestsV2 i SET ";
+				}
+				else if(array_key_exists("Interests", $array) AND count($array) <= 3)
+				{
+					$newString = $type . " interestsV2 i SET ";
+				}
+				else
+				{
+					$newString = $type . " users u SET ";
+				}
+				/*if(array_key_exists("Interests", $array) AND count($array) >= 4)
 				{
 					$newString = $type . " users u, interests i SET ";
 				}
@@ -78,9 +119,29 @@ class QueryBuilderController extends Controller
 				else
 				{
 					$newString = $type . " users u SET ";
-				}
+				}*/
 				
 				foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests" AND $key != "UserPassword")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if($key == "UserPassword")
+					{
+						$add = str_replace("user", "", strtolower($key));
+						$newString = $newString . "u." . "$add = ?, ";
+					}
+					else if ($key == "Interests")
+					{
+						$add = strtolower($key);
+						$newString = $newString . "i." . "$add = ?, ";
+
+					}
+				}
+				
+				/*foreach ($array as $key => $x)
 				{
 					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests" AND $key != "UserPassword")
 					{
@@ -100,7 +161,8 @@ class QueryBuilderController extends Controller
 							$newString = $newString . "i." . "$add = ?, ";
 						}
 					}
-				}
+				}*/
+				
 				$newString = substr($newString, 0, -2);
 				
 				if(array_key_exists("Interests", $array) AND count($array) >= 4)
@@ -291,12 +353,23 @@ class QueryBuilderController extends Controller
 					}
 					if ($key == "Interests")
 					{
+						array_push($newArray, $x);
+					}
+				}
+				/*foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests")
+					{
+						array_push($newArray, $x);
+					}
+					if ($key == "Interests")
+					{
 						foreach ($x as $keys => $y)
 						{
 							array_push($newArray, $y);
 						}
 					}
-				}
+				}*/
 				array_push($newArray, $idUser);
 				return $newArray;
 			}
@@ -312,12 +385,23 @@ class QueryBuilderController extends Controller
 					}
 					else if ($key == "Interests")
 					{
+						array_push($newArray, $x);
+					}
+				}
+				/*foreach ($array as $key => $x)
+				{
+					if ($key != "InterfaceId" AND $key != "CurrentUser" AND $key != "Interests")
+					{
+						array_push($newArray, $x);
+					}
+					else if ($key == "Interests")
+					{
 						foreach ($x as $keys => $y)
 						{
 							array_push($newArray, $y);
 						}
 					}
-				}
+				}*/
 				array_push($newArray, $idUser);
 				return $newArray;
 			}

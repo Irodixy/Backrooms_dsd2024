@@ -78,6 +78,7 @@ class ProfileCustomerController extends Controller
 				}
 			}
 			
+			/*
 			if(array_key_exists("Interests", $input))
 			{
 				//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
@@ -193,6 +194,7 @@ class ProfileCustomerController extends Controller
 					return json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
 				}	
 			}
+			*/ //A MORE COMPLEX TABLE OF INTERESTS, READY FOR MORE SPECIFICATION FOR AI GROUP
 	
 			$query = new QueryBuilderController();
 			$string = $query -> StringBuilder("UPDATE", $input["InterfaceId"], $input);
@@ -231,10 +233,16 @@ class ProfileCustomerController extends Controller
 	{
 		$input = $array->all();
 		
-		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday
+		$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday, i.interests AS Interests
+												FROM users u, interestsV2 i
+												WHERE u.username = ?
+												AND u.ID = i.IDUser',
+												[$input["CurrentUser"]]);
+		
+		/*$this->_dbSelect = DB::select('SELECT u.ID, u.username AS UserName, u.birthday AS Birthday
 												FROM users u
 												WHERE u.username = ?',
-												[$input["CurrentUser"]]);
+												[$input["CurrentUser"]]);*/
 				
 		$save = [];
 		$Interests = [];	
@@ -250,13 +258,14 @@ class ProfileCustomerController extends Controller
 					{
 						$save[$key] = $x;
 					}
-					else
+					
+					/*else
 					{
-					$temporary = DB::select('SELECT i.*
-													FROM users u, interests i
-													WHERE u.ID = ?
-													AND u.ID = i.IDUser',
-													[$x]);
+						$temporary = DB::select('SELECT i.*
+												FROM users u, interests i
+												WHERE u.ID = ?
+												AND u.ID = i.IDUser',
+												[$x]);
 															
 							foreach($temporary as $Objs)
 							{
@@ -277,11 +286,12 @@ class ProfileCustomerController extends Controller
 							//ADAPT TO STRING TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 							$values = array_values($Interests);
 							$string = implode(',', $values);
-					}
+					}*/
 				}
 			}
+			$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $input["CurrentUser"], "UserName" => $save["UserName"], "Birthday" => $save["Birthday"], "Interests" => $save["Interests"]);
 			
-			$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $input["CurrentUser"], "UserName" => $save["UserName"], "Birthday" => $save["Birthday"], "Interests" => $string);
+			/*$this->_newArray = array("InterfaceId" => 11, "CurrentUser" => $input["CurrentUser"], "UserName" => $save["UserName"], "Birthday" => $save["Birthday"], "Interests" => $string);*/
 		}
 		
 		else if(count($this->_dbSelect) == 0)

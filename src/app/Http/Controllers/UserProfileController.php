@@ -52,11 +52,18 @@ class UserProfileController extends Controller
 			$input["UserSearched"] = "";
 		}
 		
-		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
+		$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.birthday AS Birthday, u.email AS Email, i.interests AS Interests
+										FROM users u, interestsV2 i
+										WHERE u.username LIKE ?
+										AND u.ID = i.IDUser
+										AND type = "customer"',
+										['%' . $input["UserSearched"] . '%']);
+		
+		/*$this->_dbSelect = DB::select('SELECT u.ID AS UserId, u.username AS UserName, u.birthday AS Birthday, u.email AS Email
 										FROM users u
 										WHERE u.username LIKE ?
 										AND type = "customer"',
-										['%' . $input["UserSearched"] . '%']);
+										['%' . $input["UserSearched"] . '%']);*/
 				
 		$UserData = [];
 		$save = [];
@@ -65,14 +72,16 @@ class UserProfileController extends Controller
 		foreach($this->_dbSelect as $Obj)
 		{
 			$i = 0;
+			
 			//Here we separete each result from DB in their diferent keys and values
 			foreach($Obj as $key => $x)
 			{
-				if($key != "UserId")
+				/*if($key != "UserId")
 				{
 					$save[$key] = $x;
-				}
-				else 
+				}*/
+				
+				/*else 
 				{
 					$save[$key] = $x;
 					
@@ -103,12 +112,15 @@ class UserProfileController extends Controller
 					$string = implode(',', $values);
 					
 					$save["Interests"] = $string;
-				}
+				}*/
 
-				if($i >= 3)
+				$save[$key] = $x;
+
+				if($i >= 4)
 				{
 					array_push($UserData, $save);
 					$i = 0;
+					$save = [];
 				}
 				else
 				{
@@ -182,7 +194,7 @@ class UserProfileController extends Controller
 				}
 			}
 			
-			if(array_key_exists("Interests", $array))
+			/*if(array_key_exists("Interests", $array))
 			{
 				//ADAPT TO ARRAY TO BE COMPATABLE WITH OTHER GROUPS CODE (NOT RECOMENDED!!!!!)
 				$liteInterests = DB::select('SELECT *
@@ -296,7 +308,7 @@ class UserProfileController extends Controller
 				{
 					return json_decode('{"ERROR": "Multiply interests found, contact the admin!"}');
 				}
-			}
+			}*/
 			
 			$ID = 21;
 			$query = new QueryBuilderController();
@@ -337,12 +349,69 @@ class UserProfileController extends Controller
 			$array["UserPassword"] = password_hash($array["UserPassword"], PASSWORD_DEFAULT);
 		}
 		
-		$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password, birthday) 
-							values (?, ?, ?, ?)', 
-							[$array["UserId"] , $array["UserName"], $array["UserPassword"], $array["Birthday"]]);
+		if(array_key_exists("UserName", $array))
+		{
+			$username = DB::select('SELECT ID
+								FROM users
+								WHERE username = ?',
+								[$array["UserName"]]);
+								
+			if(count($username) == 1)
+			{
+				foreach($username as $Obj)
+				{
+					//Here we separete each result from DB in their diferent keys and values
+					foreach($Obj as $key => $x)
+					{
+						if($array["UserId"] != $x)
+						{
+							return json_decode('{"ERROR": "Username already been used by other account"}');
+						}	
+					}
+				}
+			}
+		}
+		
+		$this->_dbInsert = DB::insert('INSERT into users (ID ,username, password) 
+							values (?, ?, ?)', 
+							[$array["UserId"] , $array["UserName"], $array["UserPassword"]]);
 							
 		if($this->_dbInsert == 1)
 		{
+			
+			if(array_key_exists("Email", $array))
+			{
+				$email = DB::select('SELECT ID
+									FROM users
+									WHERE email = ?',
+									[$array["Email"]]);
+									
+				if(count($email) == 1)
+				{
+					foreach($email as $Obj)
+					{
+						//Here we separete each result from DB in their diferent keys and values
+						foreach($Obj as $key => $x)
+						{
+							if($array["UserId"] != $x)
+							{
+								return json_decode('{"ERROR": "Email already been used by other account"}');
+							}	
+						}
+					}
+				}
+			}
+			
+			if(array_key_exists("Birthday", $array))
+			{
+				$temporaryBirthday = DB::update('UPDATE users 
+												SET birthday = ?
+												WHERE ID = ?', 
+												[$array["Birthday"], $array["UserId"]]);
+			}
+			
+			
+			
 			$temporary = DB::select('SELECT ID
 									FROM users 
 									WHERE username = ?', 
@@ -353,10 +422,23 @@ class UserProfileController extends Controller
 				//Here we separete each result from DB in their diferent keys and values
 				foreach($Objs as $keys => $x)
 				{
-					$interst_insert = DB::insert('INSERT INTO interests (IDUser)
+					$interst_insert = DB::insert('INSERT INTO interestsV2 (IDUser)
 													VALUES (?)',
 													[$x]);
-													
+					
+					/*$interst_insert = DB::insert('INSERT INTO interests (IDUser)
+													VALUES (?)',
+													[$x]);*/
+					if(array_key_exists("Interests", $array))
+					{
+						$temporaryInterests = DB::update('UPDATE interestsV2 i, users u 
+														SET interests = ?
+														WHERE u.ID = ?
+														AND u.ID = i.IDUSer', 
+														[$array["Interests"], $array["UserId"]]);
+					}
+
+					
 					if($interst_insert == 1)
 					{
 						$SuccessToken = true;

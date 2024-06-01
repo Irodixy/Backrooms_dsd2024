@@ -44,9 +44,13 @@ class RegistrationCustomerController extends Controller
 					{
 						foreach($Obj as $key => $x)
 						{
-							$temporaryInsert = DB::insert('INSERT into interests (IDUser) 
+							$temporaryInsert = DB::insert('INSERT into interestsV2 (IDUser) 
 													values (?)', 
 													[$x]);
+							
+							/*$temporaryInsert = DB::insert('INSERT into interests (IDUser) 
+													values (?)', 
+													[$x]);*/  //A MORE COMPLEX TABLE OF INTERESTS, READY FOR MORE SPECIFICATION FOR AI GROUP
 													
 							if($temporaryInsert == 1)
 							{
