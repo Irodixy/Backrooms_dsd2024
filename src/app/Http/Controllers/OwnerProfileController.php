@@ -157,7 +157,7 @@ class OwnerProfileController extends Controller
 								[$array["UserId"]]);
 								
 		//ADAPT THE VALUES OF OTHER GROUPS TO BE USE BY MY CODE!!!!
-		if(array_key_exists("StoreLocation", $array) OR array_key_exists("StoreFloor", $array))
+		if(array_key_exists("StoreLocation", $array) AND array_key_exists("StoreFloor", $array))
 		{
 			$values_array = explode(',', $array["StoreLocation"]);
 			$array["StoreLocation"] =[];
@@ -172,7 +172,21 @@ class OwnerProfileController extends Controller
 				$array["StoreLocation"]["floor"] = $array["StoreFloor"];
 				unset($array["StoreFloor"]);
 			}
-		}						
+		}
+		else if(array_key_exists("StoreLocation", $array))
+		{
+			$values_array = explode(',', $array["StoreLocation"]);
+			$array["StoreLocation"] =[];
+			
+			$array["StoreLocation"]["latitude"] = $values_array[0];
+			$array["StoreLocation"]["longitude"] = $values_array[1];
+		}
+		else if(array_key_exists("StoreFloor", $array))
+		{
+			$array["StoreLocation"] =[];
+			$array["StoreLocation"]["floor"] = $array["StoreFloor"];
+			unset($array["StoreFloor"]);
+		}
 	
 		
 		
